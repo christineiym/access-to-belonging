@@ -45,6 +45,7 @@ export default function PanelA() {
         </h3>
       </div>
 
+      {/* TODO: change color scheme */}
       {/* Game Instructions*/}
       <GameInstructions></GameInstructions>
 
@@ -75,6 +76,7 @@ export default function PanelA() {
         }`}
       >
         <button
+          onFocus={() => window.scrollTo(0, document.body.scrollHeight)}
           onClick={() => navigate('/stories')}
           className="bg-darkPurple text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
         >

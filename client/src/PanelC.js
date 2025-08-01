@@ -111,6 +111,7 @@ export default function PanelC() {
         }`}
       >
         <button
+          onFocus={() => window.scrollTo(0, document.body.scrollHeight)}
           onClick={() => navigate('/stories')}
           className="bg-purple-800 text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-900 focus:outline-none focus:ring-2 focus:ring-purple-400"
         >

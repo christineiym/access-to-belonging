@@ -60,17 +60,19 @@ export default function PanelB() {
       {/* Decorative Teal Semicircle (include??) */}
       <div className="absolute top+[0px] right-12 w-80 h-40 bg-tcatTeal rounded-t-full shadow-lg m-10"></div>
 
-      {/* Navigation Buttons */}
+      {/* Navigation Buttons; add "flex-row-reverse" after flex to reverse tab order */}
       <div
-        className={`fixed bottom-6 left-6 right-6 flex justify-between items-center transition-all duration-500 ${showButtons ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
+        className={`fixed left-6 right-6 bottom-6 flex justify-between items-center transition-all duration-500 ${showButtons ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
         <button
+          onFocus={() => window.scrollTo(0, document.body.scrollHeight)}
           onClick={() => navigate('/')}
           className="bg-darkPurple text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
         >
           ← Back
         </button>
         <button
+          onFocus={() => window.scrollTo(0, document.body.scrollHeight)}
           onClick={() => navigate('/routes-and-timing')}
           className="bg-darkPurple text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
         >
