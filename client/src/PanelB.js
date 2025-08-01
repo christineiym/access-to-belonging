@@ -1,9 +1,14 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Story from "./Story";
 
 export default function PanelB() {
   const [showButtons, setShowButtons] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   useEffect(() => {
     const checkScroll = () => {
@@ -18,46 +23,56 @@ export default function PanelB() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-white text-black font-sans px-6 py-12">
-      <h1 className="text-4xl font-extrabold text-purpleMain text-center">Community Stories</h1>
-      <h2 className="text-xl font-semibold text-center mt-2">Feedback about Access to Belonging</h2>
-
-      {/* Amy's Story Section */}
-      <div className="mt-12 space-y-6 max-w-4xl mx-auto">
-        <div>
-          <h3 className="text-xl font-bold text-purpleMain">Amy <span className="text-purple-700 font-normal">North Bend, WA</span></h3>
-          <p className="mt-1">
-            Amy usually drives, but after an injury she primarily used{" "}
-            <strong>public transportation</strong> for several months.
-          </p>
-        </div>
-
-        <div className="bg-purple-200 p-4 rounded font-semibold max-w-sm">
-          Infrequent transit impacts connectivity to daily needs and services.
-        </div>
-
-        <blockquote className="italic border-l-4 border-tealCircle pl-4">
-          “I had to attend a <strong>90-minute meeting</strong> in Carnation, 20 minutes from where I live, and, using the local transportation, to be picked up at home, taken to the meeting, picked up after the meeting and brought back home took <strong>seven and a half hours door to door</strong>. I had to attend those meetings but doing so took up my entire day because the buses are so limited and infrequent.”
-        </blockquote>
-
-        <div>
-          <img src="https://via.placeholder.com/400x250.png?text=North+Bend+Walksheds" alt="North Bend Walksheds" className="border-4 border-purple-700 rounded-md" />
-        </div>
+    <div className="relative min-h-screen bg-white font-sans text-black pl-10 pr-10">
+      {/* Header */}
+      <div className="text-center pt-5 m-10">
+        <h1 className="text-5xl font-extrabold text-darkPurple">Community Stories</h1>
+        <p className="text-2xl font-semibold mt-2">Feedback about Access to Belonging</p>
       </div>
+
+      <Story name={"Amy"} 
+        location={"North Bend, WA"} 
+        summary={<>Amy usually drives, but after an injury she primarily used <strong>public transportation</strong> for several months.</>}
+        quote={<>“I had to attend a <strong>90-minute meeting</strong> in Carnation, 20 minutes from where I live, and, using the local transportation, to be picked up at home, taken to the meeting, picked up after the meeting and brought back home took <strong>seven and a half hours door to door</strong>. I had to attend those meetings but doing so took up my entire day because the buses are so limited and infrequent.”</>}
+        takeaway={"Infrequent transit impacts connectivity to daily needs and services."}
+        imageSource={"https://picsum.photos/400/200"}
+        imageAltText={"North Bend Walksheds"}
+      />
+
+      <Story name={"Deborah"} 
+        location={"Clarkston, WA"} 
+        summary={<>Deborah primarily <strong>relies on paratransit</strong>. Intersections feel more dangerous because they lack <strong>accessible pedestrian signals</strong> and curb ramps.</>}
+        quote={<>“The biggest issue here is actually a lack of sidewalks to get to the public transit. I do like using public transit when I can because [there is] a bit more control than you would with paratransit.”</>}
+        takeaway={"Inaccessible sidewalks impact how disabled travellers plan their trips."}
+        imageSource={"https://picsum.photos/400/200"}
+        imageAltText={"Clarkston Walksheds"}
+      />
+
+      <Story name={"Nick"} 
+        location={"Liberty Lake, WA"} 
+        summary={<>Nick wishes there were <strong>tactile markings</strong> at the transit hubs in Spokane - even just a carpet that ran along the main path through the interior of the station - so he could navigate from one end to the other without getting disoriented.</>}
+        quote={<>“I used to drive, and the thing I don't think people who can drive understand about taking the bus is how much longer it takes to go places.”</>}
+        takeaway={"A lack of tactile wayfinding results in inaccurate navigation."}
+        imageSource={"https://picsum.photos/400/200"}
+        imageAltText={"Liberty Lake Walksheds"}
+      />
+
+      {/* Decorative Teal Semicircle (include??) */}
+      <div className="absolute top+[0px] right-12 w-80 h-40 bg-tcatTeal rounded-t-full shadow-lg m-10"></div>
 
       {/* Navigation Buttons */}
       <div
         className={`fixed bottom-6 left-6 right-6 flex justify-between items-center transition-all duration-500 ${showButtons ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}
       >
         <button
-          onClick={() => navigate(-1)}
-          className="bg-purpleMain text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          onClick={() => navigate('/')}
+          className="bg-darkPurple text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
         >
           ← Back
         </button>
         <button
           onClick={() => navigate('/routes-and-timing')}
-          className="bg-purpleMain text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          className="bg-darkPurple text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
         >
           Next →
         </button>
@@ -69,17 +84,17 @@ export default function PanelB() {
 export function oldPanelB() {
   return (
     <div className="bg-white text-black font-sans px-6 py-12 space-y-12">
-      <h1 className="text-4xl font-extrabold text-purpleMain text-center">Community Stories</h1>
+      <h1 className="text-4xl font-extrabold text-darkPurple text-center">Community Stories</h1>
       <h2 className="text-xl font-semibold text-center">Feedback about Access to Belonging</h2>
 
       <div className="space-y-10">
         {/* Amy's Story */}
         <div>
-          <h3 className="text-xl font-bold text-purpleMain">Amy <span className="text-black font-normal">North Bend, WA</span></h3>
+          <h3 className="text-xl font-bold text-darkPurple">Amy <span className="text-black font-normal">North Bend, WA</span></h3>
           <p className="mt-1">
             Amy usually drives, but after an injury she primarily used <strong>public transportation</strong> for several months.
           </p>
-          <p className="mt-2 italic border-l-4 border-tealCircle pl-4">
+          <p className="mt-2 italic border-l-4 border-tcatTeal pl-4">
             “I had to attend a <strong>90-minute meeting</strong> in Carnation... took <strong>seven and a half hours door to door</strong>...”
           </p>
           <div className="mt-2 bg-purple-100 p-4 rounded text-black font-semibold max-w-sm">
@@ -89,11 +104,11 @@ export function oldPanelB() {
 
         {/* Deborah's Story */}
         <div>
-          <h3 className="text-xl font-bold text-purpleMain">Deborah <span className="text-black font-normal">Clarkston, WA</span></h3>
+          <h3 className="text-xl font-bold text-darkPurple">Deborah <span className="text-black font-normal">Clarkston, WA</span></h3>
           <p className="mt-1">
             Deborah is from Clarkston, WA and primarily <strong>relies on paratransit</strong>... they lack <strong>accessible pedestrian signals</strong> and curb ramps.
           </p>
-          <p className="mt-2 italic border-l-4 border-tealCircle pl-4">
+          <p className="mt-2 italic border-l-4 border-tcatTeal pl-4">
             “The biggest issue here is actually a lack of sidewalks to get to the public transit...”
           </p>
           <div className="mt-2 bg-purple-100 p-4 rounded text-black font-semibold max-w-sm">
@@ -103,11 +118,11 @@ export function oldPanelB() {
 
         {/* Nick's Story */}
         <div>
-          <h3 className="text-xl font-bold text-purpleMain">Nick <span className="text-black font-normal">Liberty Lake, WA</span></h3>
+          <h3 className="text-xl font-bold text-darkPurple">Nick <span className="text-black font-normal">Liberty Lake, WA</span></h3>
           <p className="mt-1">
             Nick wishes there were <strong>tactile markings</strong>... so he could navigate from one end to the other without getting disoriented.
           </p>
-          <p className="mt-2 italic border-l-4 border-tealCircle pl-4">
+          <p className="mt-2 italic border-l-4 border-tcatTeal pl-4">
             “I used to drive, and the thing I don’t think people...”
           </p>
           <div className="mt-2 bg-purple-100 p-4 rounded text-black font-semibold max-w-sm">

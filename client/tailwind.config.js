@@ -3,8 +3,8 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        purpleMain: '#4A0080',
-        tealCircle: '#29C5C0'
+        darkPurple: '#4A0080',
+        tcatTeal: '#29C5C0'
       }
     }
   },

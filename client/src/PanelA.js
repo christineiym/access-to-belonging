@@ -1,9 +1,15 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import ChutesLadders from "./ChutesLadders";
+import GameInstructions from "./GameInstructions";
 
 export default function PanelA() {
   const [showNext, setShowNext] = useState(false);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [])
 
   useEffect(() => {
     const checkScroll = () => {
@@ -20,24 +26,47 @@ export default function PanelA() {
   return (
     <div className="relative min-h-screen bg-white font-sans text-black">
       {/* Purple Top Section */}
-      <div className="bg-purpleMain text-white py-16 px-6 rounded-b-[50%] text-center">
-        <h1 className="text-5xl font-extrabold">Access</h1>
-        <h2 className="text-3xl mt-2 font-semibold">To Belonging</h2>
+      <div className="relative top-0 bg-darkPurple text-white py-16 px-6 rounded-b-[50%] text-center shadow-lg">
+        <h1 className="text-7xl font-extrabold">Access</h1>
+        <h2 className="text-5xl mt-2 font-semibold">To Belonging</h2>
       </div>
 
       {/* Teal Circle with Text */}
-      <div className="absolute right-4 top-[200px] w-72 h-72 bg-tealCircle text-black rounded-full flex items-center justify-center p-6 shadow-lg">
-        <p className="text-sm font-medium">
+      <div className="absolute right-4 top-[200px] w-80 h-80 bg-tcatTeal text-black rounded-full flex items-center justify-center p-6 shadow-lg">
+        <p className="font-medium">
           Read these real stories from the groundbreaking report <strong>Transportation Access for Everyone: Washington State</strong> by the Disability Mobility Initiative and Disability Rights Washington.
         </p>
       </div>
 
-      {/* Bottom Call to Action */}
-      <div className="mt-80 px-6 pb-40">
+      {/* Game Introduction */}
+      <div className="mt-80 px-6 pb-10">
         <h3 className="text-2xl font-bold text-black">
           Let’s play an active transportation game!
         </h3>
       </div>
+
+      {/* Game Instructions*/}
+      <GameInstructions></GameInstructions>
+
+      {/* Game Interactive Area*/}
+      <ChutesLadders></ChutesLadders>
+
+      {/* Circle with text */}
+      <div className="relative m-20 bottom+40 max-w-[400px] aspect-square rounded-full bg-purple-200 flex items-center justify-center text-center p-10 shadow-lg">
+        <p className="text-lg sm:text-xl md:text-2xl font-medium">
+          What makes a transportation system <strong>accessible, comfortable, and reliable</strong> for disabled community members? Let’s look next at what real transit riders across Washington have to say.
+        </p>
+      </div>
+
+      {/* Footer with QR and Logo */}
+      {/* <div className="flex justify-between items-center w-full max-w-[700px] px-4">
+        <div className="w-20 h-20 bg-purple-700 rounded-full flex items-center justify-center text-white text-xs text-center p-2">
+          TCAT<br />logo
+        </div>
+        <div className="w-24 h-24 bg-white border border-black flex items-center justify-center text-center text-xs p-1">
+          QR<br />Sign-up
+        </div>
+      </div> */}
 
       {/* NEXT Button (animated in). */}
       <div
@@ -45,14 +74,9 @@ export default function PanelA() {
           showNext ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
         }`}
       >
-        {/* <a href="/stories">
-          <button className="bg-purpleMain text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400">
-            Next →
-          </button>
-        </a> */}
         <button
           onClick={() => navigate('/stories')}
-          className="bg-purpleMain text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
+          className="bg-darkPurple text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
         >
           Next →
         </button>
