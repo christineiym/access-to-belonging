@@ -44,7 +44,7 @@ export default function PanelC() {
         </div>
       </div>
 
-      {/* Identity and Barriers */}
+      {/* Identity and Barriers (Placeholder - should also be a table) */}
       <div className="grid grid-cols-2 gap-8 mt-10 px-8 text-lg font-semibold text-center">
         <div>
           <p className="text-xl font-bold mb-4">I Am A…</p>
@@ -69,7 +69,7 @@ export default function PanelC() {
       </div>
 
       {/* Interactive Yarnboard */}
-      {/* <YarnBoard></YarnBoard> */}
+      <YarnBoard></YarnBoard>
 
 
       {/* Travel Time Section */}

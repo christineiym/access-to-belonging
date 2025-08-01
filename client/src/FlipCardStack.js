@@ -31,7 +31,7 @@ export default function FlipCardStack({ type, allCards }) {
       setDrawn([]);
       storage.setItem(storageKey, JSON.stringify({ remaining: allCards, drawn: [] }));
     }
-  }, [allCards, storageKey]);
+  }, [allCards, storageKey, storage]);
 
   const handleDraw = () => {
     if (remaining.length === 0 || animatingCard) return;
@@ -75,10 +75,11 @@ export default function FlipCardStack({ type, allCards }) {
           <div
             tabIndex={remaining.length > 0 ? 0 : -1}
             ref={drawZoneRef}
-            className={`relative w-32 h-48 transition-all duration-300 transform focus:outline focus:ring-2 focus:ring-blue-400 ${remaining.length === 0 ? "opacity-30 cursor-default" : "cursor-pointer hover:scale-105"}`}
+            className={`relative w-32 h-48 transition-all duration-300 transform ${remaining.length === 0 ? "opacity-100 cursor-default" : "cursor-pointer hover:scale-105 focus:outline focus:ring-2 focus:ring-blue-400"}`}
             onClick={handleDraw}
             onKeyDown={(e) => e.key === "Enter" && handleDraw()}
           >
+
             {remaining.map((_, i) => (
               <div
                 key={i}
@@ -104,7 +105,7 @@ export default function FlipCardStack({ type, allCards }) {
             {remaining.length === 0 && (
               <button
                 onClick={reshuffle}
-                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-green-600 text-white text-sm px-4 py-1 rounded hover:bg-green-700"
+                className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-green-600 border border-black text-white px-4 py-1 rounded hover:bg-green-700"
               >
                 Reshuffle
               </button>

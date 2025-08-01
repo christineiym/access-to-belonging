@@ -6,6 +6,7 @@ const rightLabels = ['Lack of lighting', 'Large cracks', 'No curb ramps', 'Steep
 
 export default function YarnBoard() {
   const [mode, setMode] = useState(localStorage.getItem('hasSubmitted') ? 'view' : 'edit');
+  // const [mode, setMode] = useState(null);
   const [connections, setConnections] = useState([]);
   const [sessionConnections, setSessionConnections] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -19,19 +20,25 @@ export default function YarnBoard() {
   const [preview, setPreview] = useState(null);
 
   useEffect(() => {
+    setMode("view");
+  }, []);
+
+  useEffect(() => {
     axios.get('http://localhost:3001/connections').then(res => setConnections(res.data));
   }, [mode]);
 
-  useEffect(() => {
-    const el = dotRefs.current[`${focus.side}-${focus.index}`];
-    el?.focus();
-    const label = focus.side === 'left' ? leftLabels[focus.index] : rightLabels[focus.index];
-    speak(label);
-  }, [focus]);
+  // useEffect(() => {
+  //   const el = dotRefs.current[`${focus.side}-${focus.index}`];
+  //   el?.focus();
+  //   const label = focus.side === 'left' ? leftLabels[focus.index] : rightLabels[focus.index];
+  //   speak(el.id, label);
+  // }, [focus, speak]);
 
   const speak = (msg) => {
-    const utter = new SpeechSynthesisUtterance(msg);
-    window.speechSynthesis.speak(utter);
+    // const utter = new SpeechSynthesisUtterance(msg);
+    // window.speechSynthesis.speak(utter);
+    const currentDot = dotRefs.current[`${focus.side}-${focus.index}`];
+    currentDot.setAttribute('aria-label', msg);
   };
 
   const handleKey = (e) => {
@@ -97,11 +104,11 @@ export default function YarnBoard() {
     try {
       await Promise.all(
         sessionConnections.map(({ from, to }) =>
-          axios.post('/connections', { from, to })
+          axios.post('http://localhost:3001/connections', { from, to })
         )
       );
       localStorage.setItem('hasSubmitted', 'true');
-      setMode('view');
+      toggleMode();
       setPopup(true);
     } catch (error) {
       console.error('Error submitting connections:', error);
@@ -198,6 +205,10 @@ export default function YarnBoard() {
     speak(text);
   };
 
+  const toggleMode = () => {
+    mode === 'edit' ? setMode('view') : setMode('edit');
+  }
+
   return (
     <div className="relative p-10 flex justify-center gap-20" tabIndex={0} onKeyDown={handleKey} onMouseMove={handleMouseMove}>
       <svg ref={svgRef} className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
@@ -226,12 +237,16 @@ export default function YarnBoard() {
         ))}
       </div>
 
-      {mode === 'edit' && (
-        <div className="absolute bottom-6 right-6 flex gap-4">
-          <button onClick={clearConnections} className="bg-gray-300 px-4 py-2 rounded">Clear All</button>
-          <button onClick={handleSubmit} className="bg-purple-600 text-white px-4 py-2 rounded">Submit</button>
-        </div>
-      )}
+      {mode === 'view'
+        ? <div className="absolute bottom-6 right-6 flex gap-4">
+            <button onClick={toggleMode()} className="bg-purple-600 text-white px-4 py-2 rounded">New Submission</button>
+          </div>
+        : <div className="absolute bottom-6 right-6 flex gap-4">
+            {/* <button onClick={toggleMode()} className="bg-purple-600 text-white px-4 py-2 rounded">Cancel</button> */}
+            <button onClick={clearConnections} className="bg-gray-300 px-4 py-2 rounded">Clear All</button>
+            <button onClick={handleSubmit} className="bg-purple-600 text-white px-4 py-2 rounded">Submit</button>
+          </div>
+      }
 
       {popup && (
         <div className="fixed bottom-6 left-6 bg-white border p-4 rounded shadow">Thank you for submitting!</div>
