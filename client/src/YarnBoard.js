@@ -42,7 +42,7 @@ export default function YarnBoard() {
   };
 
   const handleKey = (e) => {
-    e.preventDefault();
+    // e.preventDefault();
     const currentLabels = focus.side === 'left' ? leftLabels : rightLabels;
     const otherSide = focus.side === 'left' ? 'right' : 'left';
 
@@ -139,25 +139,43 @@ export default function YarnBoard() {
     const isSelected = selected?.side === side && selected.index === index;
     const isFocused = focus.side === side && focus.index === index;
     const key = `${side}-${index}`;
-    return (
-      <div className="flex items-center gap-2" key={key}>
-        <div
-          ref={el => dotRefs.current[key] = el}
-          tabIndex={0}
-          role="button"
-          aria-label={`${side === 'left' ? leftLabels[index] : rightLabels[index]}`}
-          onClick={() => handleClick(side, index)}
-          onMouseDown={() => handleMouseDown(side, index)}
-          onMouseUp={() => handleMouseUp(side, index)}
-          onMouseEnter={() => setHovered({ side, index })}
-          onMouseLeave={() => setHovered(null)}
-          className={`w-6 h-6 rounded-full border-4 ${
-            isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
-          } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
-        />
-        <span>{side === 'left' ? leftLabels[index] : rightLabels[index]}</span>
-      </div>
-    );
+
+    if (mode === 'edit') {
+      return (
+        <div className="flex items-center gap-2" key={key}>
+          <div
+            ref={el => dotRefs.current[key] = el}
+            tabIndex={0}
+            role="button"
+            aria-label={`${side === 'left' ? leftLabels[index] : rightLabels[index]}`}
+            onClick={() => handleClick(side, index)}
+            onMouseDown={() => handleMouseDown(side, index)}
+            onMouseUp={() => handleMouseUp(side, index)}
+            onMouseEnter={() => setHovered({ side, index })}
+            onMouseLeave={() => setHovered(null)}
+            className={`w-6 h-6 rounded-full border-4 ${
+              isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
+            } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
+          />
+          <span>{side === 'left' ? leftLabels[index] : rightLabels[index]}</span>
+        </div>
+      );
+    } else {
+      return (
+        <div className="flex items-center gap-2" key={key}>
+          <div
+            ref={el => dotRefs.current[key] = el}
+            tabIndex={0}
+            role="button"
+            aria-label={getConnectionCountMessage(side, index)}
+            className={`w-6 h-6 rounded-full border-4 ${
+              isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
+            } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
+          />
+          <span>{side === 'left' ? leftLabels[index] : rightLabels[index]}</span>
+        </div>
+      );
+    }
   };
 
   const renderConnections = (set) => {
@@ -196,21 +214,30 @@ export default function YarnBoard() {
     );
   };
 
-  const renderViewAnnounce = (side, index) => {
+  // const renderViewAnnounce = (side, index) => {
+  //   const count = side === 'left'
+  //     ? connections.filter(c => c.from === index).length
+  //     : connections.filter(c => c.to === index).length;
+  //   const label = side === 'left' ? leftLabels[index] : rightLabels[index];
+  //   const text = `${count} connections to ${label}`;
+  //   speak(text);
+  // };
+
+  const getConnectionCountMessage = (side, index) => {
     const count = side === 'left'
       ? connections.filter(c => c.from === index).length
       : connections.filter(c => c.to === index).length;
     const label = side === 'left' ? leftLabels[index] : rightLabels[index];
     const text = `${count} connections to ${label}`;
-    speak(text);
-  };
+    return text;
+  }
 
   const toggleMode = () => {
     mode === 'edit' ? setMode('view') : setMode('edit');
   }
 
   return (
-    <div className="relative p-10 flex justify-center gap-20" tabIndex={0} onKeyDown={handleKey} onMouseMove={handleMouseMove}>
+    <div className="relative p-10 flex justify-center gap-20" onKeyDown={handleKey} onMouseMove={handleMouseMove}>
       <svg ref={svgRef} className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
         {mode === 'edit' && renderConnections(sessionConnections)}
         {mode === 'view' && renderConnections(connections)}
@@ -219,21 +246,12 @@ export default function YarnBoard() {
 
       <div className="flex flex-col gap-8 z-10">
         {leftLabels.map((_, i) => (
-          <div
-            key={i}
-            onKeyDown={(e) => e.key === 'Enter' && mode === 'view' && renderViewAnnounce('left', i)}>
-            {renderDot('left', i)}
-          </div>
+          renderDot('left', i)
         ))}
       </div>
-
       <div className="flex flex-col gap-8 z-10">
         {rightLabels.map((_, i) => (
-          <div
-            key={i}
-            onKeyDown={(e) => e.key === 'Enter' && mode === 'view' && renderViewAnnounce('right', i)}>
-            {renderDot('right', i)}
-          </div>
+          renderDot('right', i)
         ))}
       </div>
 
