@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 
 const leftLabels = ['Wheelchair User', 'Cyclist', 'Avid Walker', 'Parent with a stroller', 'Transit Rider'];
@@ -12,19 +12,21 @@ export default function YarnBoard() {
   const [selected, setSelected] = useState(null);
   const [focus, setFocus] = useState({ side: 'left', index: 0 });
   const [popup, setPopup] = useState(false);
-  const dotRefs = useRef({});
-  const svgRef = useRef(null);
-
   const [hovered, setHovered] = useState(null);
   const [dragging, setDragging] = useState(null);
   const [preview, setPreview] = useState(null);
+  // const [svgDimensions, setSvgDimensions] = useState(null);
+
+  const parentRef = useRef(null);
 
   useEffect(() => {
     setMode("view");
   }, []);
 
   useEffect(() => {
-    axios.get('http://localhost:3001/connections').then(res => setConnections(res.data));
+    axios.get('http://localhost:3001/connections').then(res => {
+      setConnections(res.data);
+    });
   }, [mode]);
 
   // useEffect(() => {
@@ -34,12 +36,36 @@ export default function YarnBoard() {
   //   speak(el.id, label);
   // }, [focus, speak]);
 
-  const speak = (msg) => {
+  const getDotByLocation = (side, index) => {
+    let dot;
+    if (parentRef.current) {
+      const subElement = parentRef.current.querySelector(`#${side}-${index}`);
+      if (subElement) {
+        dot = subElement;
+      }
+    } else {
+      console.log("not current");
+    }
+    // console.log("Dot gotten by location:")
+    // console.log(dot);
+    return dot;
+  };
+
+  const speak = (msg) => { // should only call when focus changes
     // const utter = new SpeechSynthesisUtterance(msg);
     // window.speechSynthesis.speak(utter);
-    const currentDot = dotRefs.current[`${focus.side}-${focus.index}`];
+    const currentDot = getDotByLocation(focus.side, focus.index);
     currentDot.setAttribute('aria-label', msg);
+    // reset label afterward
   };
+
+  const actuallyFocus = ({side, index}) => {
+    // how to make this atomic?
+    console.log(`Current focus: ${side}-${index}`);
+    setFocus({side, index});  // apparently there's some sort of asynchronization going on here
+    const currentDot = getDotByLocation(side, index);
+    currentDot.focus({ preventScroll: true, focusVisible: true });
+  }
 
   const handleKey = (e) => {
     // e.preventDefault();
@@ -47,17 +73,19 @@ export default function YarnBoard() {
     const otherSide = focus.side === 'left' ? 'right' : 'left';
 
     if (e.key === 'ArrowDown') {
-      setFocus({ ...focus, index: (focus.index + 1) % currentLabels.length });
+      actuallyFocus({ ...focus, index: (focus.index + 1) % currentLabels.length });  // what about speaking?
     } else if (e.key === 'ArrowUp') {
-      setFocus({ ...focus, index: (focus.index - 1 + currentLabels.length) % currentLabels.length });
+      actuallyFocus({ ...focus, index: (focus.index - 1 + currentLabels.length) % currentLabels.length });
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       const newIndex = Math.min(focus.index, otherSide === 'left' ? leftLabels.length - 1 : rightLabels.length - 1);
-      setFocus({ side: otherSide, index: newIndex });
+      actuallyFocus({ side: otherSide, index: newIndex });
       if (selected) {
         const label = otherSide === 'left' ? leftLabels[newIndex] : rightLabels[newIndex];
         speak(`${label}. Press Enter to finish connection.`);
       }
     } else if (e.key === 'Enter') {
+      actuallyFocus({ ...focus});
+
       if (!selected) {
         setSelected(focus);
         speak(`${currentLabels[focus.index]} is selected. Go ${otherSide} to complete a connection.`);
@@ -72,6 +100,7 @@ export default function YarnBoard() {
         speak('Selection cleared.');
       }
     } else if (e.key === 'Backspace' || e.key === 'Delete') {
+      actuallyFocus({ ...focus});
       if (mode === 'edit') {
         const from = selected?.side === 'left' ? selected.index : focus.index;
         const to = selected?.side === 'left' ? focus.index : selected.index;
@@ -83,6 +112,7 @@ export default function YarnBoard() {
   };
 
   const handleClick = (side, index) => {
+    actuallyFocus({side, index});
     if (!selected) {
       setSelected({ side, index });
       speak(`${(side === 'left' ? leftLabels : rightLabels)[index]} is selected. Go ${side === 'left' ? 'right' : 'left'} to complete a connection.`);
@@ -101,11 +131,15 @@ export default function YarnBoard() {
   const clearConnections = () => setSessionConnections([]);
 
   const handleSubmit = async () => {
+    console.log()
     try {
       await Promise.all(
-        sessionConnections.map(({ from, to }) =>
-          axios.post('http://localhost:3001/connections', { from, to })
-        )
+        sessionConnections.map(({ from, to }) => {
+          axios.post('http://localhost:3001/connections', { from, to });
+          console.log("new connection!");
+          console.log(from);
+          console.log(to);
+        })
       );
       localStorage.setItem('hasSubmitted', 'true');
       toggleMode();
@@ -135,17 +169,18 @@ export default function YarnBoard() {
     }
   };
 
-  const renderDot = (side, index) => {
+  const renderDotHtml = (side, index) => {
     const isSelected = selected?.side === side && selected.index === index;
     const isFocused = focus.side === side && focus.index === index;
     const key = `${side}-${index}`;
 
+    let dot;
     if (mode === 'edit') {
-      return (
-        <div className="flex items-center gap-2" key={key}>
+      dot = (
+        <div className={`dot flex-col-reverse items-center gap-2 ${side === 'left' ? leftLabels[index] : rightLabels[index]}`} key={key}>
           <div
-            ref={el => dotRefs.current[key] = el}
             tabIndex={0}
+            id={key}
             role="button"
             aria-label={`${side === 'left' ? leftLabels[index] : rightLabels[index]}`}
             onClick={() => handleClick(side, index)}
@@ -161,13 +196,18 @@ export default function YarnBoard() {
         </div>
       );
     } else {
-      return (
-        <div className="flex items-center gap-2" key={key}>
+      dot = (
+        <div className={`dot items-center gap-2 ${side === 'left' ? 'flex flex-row-reverse' : 'flex'}`} key={key}>
           <div
-            ref={el => dotRefs.current[key] = el}
             tabIndex={0}
+            id={key}
             role="button"
             aria-label={getConnectionCountMessage(side, index)}
+            // onClick={() => handleClick(side, index)}
+            // onMouseDown={() => handleMouseDown(side, index)}
+            // onMouseUp={() => handleMouseUp(side, index)}
+            // onMouseEnter={() => setHovered({ side, index })}
+            // onMouseLeave={() => setHovered(null)}
             className={`w-6 h-6 rounded-full border-4 ${
               isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
             } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
@@ -176,20 +216,82 @@ export default function YarnBoard() {
         </div>
       );
     }
+    return dot;
+  };
+
+  const renderDotSvg = (side, index) => {
+    const isSelected = selected?.side === side && selected.index === index;
+    const isFocused = focus.side === side && focus.index === index;
+    const key = `${side}-${index}`;
+
+    let dot;
+    if (mode === 'edit') {
+      dot = (
+        <circle
+          tabIndex={0}
+          id={key}
+          key={key}
+          role="button"
+          aria-label={`${side === 'left' ? leftLabels[index] : rightLabels[index]}`}
+          onClick={() => handleClick(side, index)}
+          onMouseDown={() => handleMouseDown(side, index)}
+          onMouseUp={() => handleMouseUp(side, index)}
+          onMouseEnter={() => setHovered({ side, index })}
+          onMouseLeave={() => setHovered(null)}
+          className={`w-6 h-6 rounded-full border-4 ${
+            isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
+          } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
+        />
+          // <span>{side === 'left' ? leftLabels[index] : rightLabels[index]}</span>
+      );
+    } else {
+      dot = (
+        <circle
+          tabIndex={0}
+          id={key}
+          key={key}
+          role="button"
+          aria-label={getConnectionCountMessage(side, index)}
+          // onClick={() => handleClick(side, index)}
+          // onMouseDown={() => handleMouseDown(side, index)}
+          // onMouseUp={() => handleMouseUp(side, index)}
+          // onMouseEnter={() => setHovered({ side, index })}
+          // onMouseLeave={() => setHovered(null)}
+          className={`w-6 h-6 rounded-full border-4 ${
+            isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
+          } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
+        />
+        // <span>{side === 'left' ? leftLabels[index] : rightLabels[index]}</span>
+      );
+    }
+    return dot;
   };
 
   const renderConnections = (set) => {
-    return set.map((c, i) => {
-      const from = dotRefs.current[`left-${c.from}`]?.getBoundingClientRect();
-      const to = dotRefs.current[`right-${c.to}`]?.getBoundingClientRect();
+    console.log(set);
+    return set.map((connectionInfo, connectionIndex) => {
+      // let {leftIndex, rightIndex} = connectionInfo;  // why isn't destructuring working?
+      let leftIndex = connectionInfo.fromDot;
+      let rightIndex = connectionInfo.toDot;
+      const from = getDotByLocation('left', leftIndex)?.getBoundingClientRect();
+      const to = getDotByLocation('right', rightIndex)?.getBoundingClientRect();
       if (!from || !to) return null;
+      
+      let current_x1 = from.left + 12;
+      let current_y1 = from.top + 12 + window.scrollY;
+      let current_x2 = to.left + 12;
+      let current_y2 = to.top + 12 + window.scrollY;
+
+      // console.log(`connection ${connectionIndex}: from ${leftIndex} to ${rightIndex}`)
+      console.log(`line ${connectionIndex}: (${current_x1},${current_y1}) to (${current_x2},${current_y2})`);
+
       return (
         <line
-          key={i}
-          x1={from.left + 12}
-          y1={from.top + 12 + window.scrollY}
-          x2={to.left + 12}
-          y2={to.top + 12 + window.scrollY}
+          key={connectionIndex}
+          x1={current_x1}
+          y1={current_y1}
+          x2={current_x2}
+          y2={current_y2}
           stroke="purple"
           strokeWidth={3}
         />
@@ -197,9 +299,12 @@ export default function YarnBoard() {
     });
   };
 
+  const memoizedRenderConnections = useCallback(renderConnections, []);
+
   const renderPreviewLine = () => {
     if (!dragging || !preview) return null;
-    const from = dotRefs.current[`${dragging.side}-${dragging.index}`]?.getBoundingClientRect();
+    // const from = dotRefs.current[`${dragging.side}-${dragging.index}`]?.getBoundingClientRect();
+    const from = getDotByLocation(dragging.side, dragging.index)?.getBoundingClientRect();
     if (!from) return null;
     return (
       <line
@@ -223,7 +328,7 @@ export default function YarnBoard() {
   //   speak(text);
   // };
 
-  const getConnectionCountMessage = (side, index) => {
+  const getConnectionCountMessage = (side, index) => { // apparently left is from, right is to
     const count = side === 'left'
       ? connections.filter(c => c.from === index).length
       : connections.filter(c => c.to === index).length;
@@ -236,28 +341,99 @@ export default function YarnBoard() {
     mode === 'edit' ? setMode('view') : setMode('edit');
   }
 
-  return (
-    <div className="relative p-10 flex justify-center gap-20" onKeyDown={handleKey} onMouseMove={handleMouseMove}>
-      <svg ref={svgRef} className="absolute top-0 left-0 w-full h-full z-0 pointer-events-none">
-        {mode === 'edit' && renderConnections(sessionConnections)}
-        {mode === 'view' && renderConnections(connections)}
-        {renderPreviewLine()}
-      </svg>
+  useEffect(() => {
+    if (parentRef.current) {
+      let currentSvg = parentRef.current.querySelector(`#connectionSvg`);
+      let dim = currentSvg.getBoundingClientRect();
+      console.log("Old viewBox:", currentSvg.viewBox.baseVal)
+      console.log("Goal viewBox (info):", dim);
+      currentSvg.setAttribute("viewBox", `${dim.x} ${dim.y} ${dim.width} ${dim.height}`)  // Fix viewBox in rendered SVG
+      let afterSvg = parentRef.current.querySelector(`#connectionSvg`);
+      console.log("New viewBox:", afterSvg.viewBox.baseVal);
 
+      if (mode === 'edit') {
+        memoizedRenderConnections(sessionConnections);
+      } else {
+        memoizedRenderConnections(connections);
+      }
+    }
+    // window.addEventListener('resize', memoizedRenderConnections);
+
+    // const handleResize = (entries) => {
+    //   if (parentRef.current) {
+    //     let currentSvg = parentRef.current.querySelector(`#connectionSvg`);
+    //     let dim = currentSvg.getBoundingClientRect();
+    //     console.log("Old viewBox:", currentSvg.viewBox.baseVal)
+    //     console.log("Goal viewBox (info):", dim);
+    //     currentSvg.setAttribute("viewBox", `${dim.x} ${dim.y} ${dim.width} ${dim.height}`)  // Fix viewBox in rendered SVG
+    //     let afterSvg = parentRef.current.querySelector(`#connectionSvg`);
+    //     console.log("New viewBox:", afterSvg.viewBox.baseVal);
+    //     if (mode === 'edit') {
+    //       memoizedRenderConnections(sessionConnections);
+    //     } else {
+    //       memoizedRenderConnections(connections);
+    //     }
+    //   }
+    // };
+    // const resizeObserver = new ResizeObserver(handleResize);
+    // if (parentRef.current) {
+    //   resizeObserver.observe(parentRef.current);
+    //   // let currentDots = parentRef.current.querySelectorAll(".dot");
+    //   // for (let currentDot of currentDots) {
+    //   //   resizeObserver.observe(currentDot);
+    //   // }
+    // }
+    // // Cleanup function for when the component unmounts
+    // return () => {
+    //   resizeObserver.disconnect();
+    // };
+  }, [mode, connections, sessionConnections, memoizedRenderConnections]);
+
+  return (
+    // <div className="w-[96%] h-[400px] relative p-5 m-5 justify-center" onKeyDown={handleKey} onMouseMove={handleMouseMove} ref={parentRef}>
+    <div className="relative p-10 flex justify-center gap-0" onKeyDown={handleKey} onMouseMove={handleMouseMove} ref={parentRef}>
       <div className="flex flex-col gap-8 z-10">
         {leftLabels.map((_, i) => (
-          renderDot('left', i)
+          renderDotHtml('left', i)
         ))}
       </div>
+
+      <div className="flex z-0">
+        {/* <svg id="connectionSvg" overflow="visible" viewBox="50 650 400 400" className="absolute top-0 left-0 z-0 w-full h-full pointer-events-none"> */}
+        {/* Surely there's a better way to specify this...      xMidYMid meet vs. none*/}
+        {/* <svg id="connectionSvg" overflow="visible" viewBox="0 0 500 500" preserveAspectRatio="none" style={{outline: "2px solid black"}} 
+          className="absolute top-0 left-0 z-0 w-[96%] h-full m-5 pointer-events-none"> */}
+        <svg id="connectionSvg" overflow="visible" viewBox="0 0 500 500" preserveAspectRatio="none" style={{outline: "2px solid black"}} 
+          className="z-0 w-full h-full pointer-events-none">
+          {/* {leftLabels.map((_, i) => (
+            renderDot('left', i)
+          ))}
+          {leftLabels.map((_, i) => (
+            <text x="40%" y={`${(15*i)+150}%`} textAnchor='end'>{leftLabels[i]}</text>  
+          ))}
+
+          {rightLabels.map((_, i) => (
+            renderDot('right', i)
+          ))}
+          {rightLabels.map((_, i) => ( // (i*60) + 450
+            <text x="60%" y="250%" textAnchor='start'>{rightLabels[i]}</text>  
+          ))} */}
+
+          {mode === 'edit' && renderConnections(sessionConnections)}
+          {mode === 'view' && renderConnections(connections)}
+          {renderPreviewLine()}
+        </svg>
+      </div>
+
       <div className="flex flex-col gap-8 z-10">
         {rightLabels.map((_, i) => (
-          renderDot('right', i)
+          renderDotHtml('right', i)
         ))}
       </div>
 
       {mode === 'view'
         ? <div className="absolute bottom-6 right-6 flex gap-4">
-            <button onClick={toggleMode()} className="bg-purple-600 text-white px-4 py-2 rounded">New Submission</button>
+            <button onClick={toggleMode} className="bg-purple-600 text-white px-4 py-2 rounded">New Submission</button>
           </div>
         : <div className="absolute bottom-6 right-6 flex gap-4">
             {/* <button onClick={toggleMode()} className="bg-purple-600 text-white px-4 py-2 rounded">Cancel</button> */}
