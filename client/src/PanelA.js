@@ -27,8 +27,8 @@ export default function PanelA() {
     <div className="relative min-h-screen bg-white font-sans text-black">
       {/* Purple Top Section */}
       <div className="relative top-0 bg-darkPurple text-white py-16 px-6 rounded-b-[50%] text-center shadow-lg">
-        <h1 className="text-7xl font-extrabold">Access</h1>
-        <h2 className="text-5xl mt-2 font-semibold">To Belonging</h2>
+        <h1 className="text-7xl font-extrabold">Access <br></br>To Belonging</h1>
+        {/* <h2 className="text-5xl mt-2 font-semibold">To Belonging</h2> */}
       </div>
 
       {/* Teal Circle with Text */}

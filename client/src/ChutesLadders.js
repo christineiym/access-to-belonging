@@ -31,7 +31,7 @@ export default function ChutesLadders() {
         <div className="flex flex-col md:flex-row items-center bg-gray-100 p-10 gap-8 space-y-0">
 
             {/* Base board */}
-            <div className="grid grid-cols-8 border-4 border-black">
+            <div className="grid grid-cols-8 border-4 border-black" role="none presentation">
                 {tiles.map((num) => {
                     const ladder = isLadder(num);
                     const slide = isSlide(num);

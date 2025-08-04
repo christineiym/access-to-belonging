@@ -24,17 +24,15 @@ export default function YarnBoard() {
   }, []);
 
   useEffect(() => {
-    axios.get('http://localhost:3001/connections').then(res => {
-      setConnections(res.data);
-    });
+    // TODO: Change to actual connections in production
+    // axios.get('http://localhost:3001/connections').then(res => {
+    //   setConnections(res.data);
+    // });
+    fetch("/cards.json")
+      .then((res) => res.json())
+      .then((json) => {
+        setConnections(json);});
   }, [mode]);
-
-  // useEffect(() => {
-  //   const el = dotRefs.current[`${focus.side}-${focus.index}`];
-  //   el?.focus();
-  //   const label = focus.side === 'left' ? leftLabels[focus.index] : rightLabels[focus.index];
-  //   speak(el.id, label);
-  // }, [focus, speak]);
 
   const getDotByLocation = (side, index) => {
     let dot;
@@ -46,8 +44,6 @@ export default function YarnBoard() {
     } else {
       console.log("not current");
     }
-    // console.log("Dot gotten by location:")
-    // console.log(dot);
     return dot;
   };
 
@@ -177,7 +173,7 @@ export default function YarnBoard() {
     let dot;
     if (mode === 'edit') {
       dot = (
-        <div className={`dot flex-col-reverse items-center gap-2 ${side === 'left' ? leftLabels[index] : rightLabels[index]}`} key={key}>
+        <div className={`dot items-center gap-2 ${side === 'left' ? 'flex flex-row-reverse' : 'flex'}`} key={key}>
           <div
             tabIndex={0}
             id={key}
@@ -201,7 +197,7 @@ export default function YarnBoard() {
           <div
             tabIndex={0}
             id={key}
-            role="button"
+            // role="button"
             aria-label={getConnectionCountMessage(side, index)}
             // onClick={() => handleClick(side, index)}
             // onMouseDown={() => handleMouseDown(side, index)}
@@ -246,8 +242,7 @@ export default function YarnBoard() {
     });
   };
 
-  const memoizedRenderConnections = useCallback(renderConnections, []);
-
+  // const memoizedRenderConnections = useCallback(renderConnections, []);
 
   // TODO: fix!!
   const renderPreviewLine = () => {
@@ -285,14 +280,14 @@ export default function YarnBoard() {
     <div className="h-[450px]">
       <div className="relative p-10 flex justify-center gap-0 h-[370px]" onKeyDown={handleKey} onMouseMove={handleMouseMove} ref={parentRef}>
         <div className="flex flex-col gap-8 z-10" style={{"white-space": "nowrap"}}>
-          <p className='text-right text-xl'><strong>I Am A...</strong></p>
+          <p className='text-left text-xl'><strong>I am a…</strong></p>
           {leftLabels.map((_, i) => (
             renderDotHtml('left', i)
           ))}
         </div>
 
         <div className="flex pt-2.5 z-0 min-w-[30%]">
-          <svg id="connectionSvg" overflow="visible" viewBox="0 0 100 100" preserveAspectRatio="none" 
+          <svg id="connectionSvg" overflow="visible" viewBox="0 0 100 100" preserveAspectRatio="none" alt=""
             className="z-0 w-full h-full pointer-events-none">
             {mode === 'edit' && renderConnections(sessionConnections)}
             {mode === 'view' && renderConnections(connections)}
@@ -321,8 +316,8 @@ export default function YarnBoard() {
             </div>
         }
 
-        {popup && (
-          <div className="fixed bottom-6 left-6 bg-white border p-4 rounded shadow">Thank you for submitting!</div>
+        {popup && ( // TODO: go away
+          <div className="w-[220px] bg-white border p-4 rounded shadow">Thank you for submitting!</div>
         )}
       </div>
     </div>

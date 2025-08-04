@@ -35,7 +35,7 @@ export default function PanelC() {
         <div className="bg-darkPurple text-white px-6 py-4 rounded-md max-w-2xl grid grid-cols-2 gap-8 text-left">
           <div>
             <p className="font-bold text-xl">How To</p>
-            <p className="text-normal">What affects you as a traveller? Connect how you identify with what you experience with this activity below!</p>
+            <p className="text-normal">What affects you as a traveller? Connect how you identify with what you experience in the following activity!</p>
           </div>
           <div>
             <p className="font-bold text-xl">Connect</p>
@@ -44,33 +44,8 @@ export default function PanelC() {
         </div>
       </div>
 
-      {/* Identity and Barriers (Placeholder - should also be a table) */}
-      <div className="grid grid-cols-2 gap-8 mt-10 px-8 text-lg font-semibold text-center">
-        <div>
-          <p className="text-xl font-bold mb-4">I Am A…</p>
-          <ul className="space-y-4">
-            <li>Wheelchair User</li>
-            <li>Cyclist</li>
-            <li>Avid Walker</li>
-            <li>Parent with a stroller</li>
-            <li>Transit Rider</li>
-          </ul>
-        </div>
-        <div>
-          <p className="text-xl font-bold mb-4">Barriers I experience…</p>
-          <ul className="space-y-4">
-            <li>Lack of lighting</li>
-            <li>Large cracks</li>
-            <li>No curb ramps</li>
-            <li>Steep inclines</li>
-            <li>Confusing wayfinding</li>
-          </ul>
-        </div>
-      </div>
-
-      {/* Interactive Yarnboard */}
+      {/* Interactive Yarnboard (table?) */}
       <YarnBoard></YarnBoard>
-
 
       {/* Travel Time Section */}
       <div className="text-center mt-20">
