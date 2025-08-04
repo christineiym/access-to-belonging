@@ -66,71 +66,18 @@ export default function PanelB() {
       >
         <button
           onFocus={() => window.scrollTo(0, document.body.scrollHeight)}
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/access-to-belonging/')}
           className="bg-darkPurple text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
         >
           ← Back
         </button>
         <button
           onFocus={() => window.scrollTo(0, document.body.scrollHeight)}
-          onClick={() => navigate('/routes-and-timing')}
+          onClick={() => navigate('/access-to-belonging/routes-and-timing')}
           className="bg-darkPurple text-white px-6 py-3 rounded-full shadow-lg hover:bg-purple-800 focus:outline-none focus:ring-2 focus:ring-purple-400"
         >
           Next →
         </button>
-      </div>
-    </div>
-  );
-}
-
-export function oldPanelB() {
-  return (
-    <div className="bg-white text-black font-sans px-6 py-12 space-y-12">
-      <h1 className="text-4xl font-extrabold text-darkPurple text-center">Community Stories</h1>
-      <h2 className="text-xl font-semibold text-center">Feedback about Access to Belonging</h2>
-
-      <div className="space-y-10">
-        {/* Amy's Story */}
-        <div>
-          <h3 className="text-xl font-bold text-darkPurple">Amy <span className="text-black font-normal">North Bend, WA</span></h3>
-          <p className="mt-1">
-            Amy usually drives, but after an injury she primarily used <strong>public transportation</strong> for several months.
-          </p>
-          <p className="mt-2 italic border-l-4 border-tcatTeal pl-4">
-            “I had to attend a <strong>90-minute meeting</strong> in Carnation... took <strong>seven and a half hours door to door</strong>...”
-          </p>
-          <div className="mt-2 bg-purple-100 p-4 rounded text-black font-semibold max-w-sm">
-            Infrequent transit impacts connectivity to daily needs and services.
-          </div>
-        </div>
-
-        {/* Deborah's Story */}
-        <div>
-          <h3 className="text-xl font-bold text-darkPurple">Deborah <span className="text-black font-normal">Clarkston, WA</span></h3>
-          <p className="mt-1">
-            Deborah is from Clarkston, WA and primarily <strong>relies on paratransit</strong>... they lack <strong>accessible pedestrian signals</strong> and curb ramps.
-          </p>
-          <p className="mt-2 italic border-l-4 border-tcatTeal pl-4">
-            “The biggest issue here is actually a lack of sidewalks to get to the public transit...”
-          </p>
-          <div className="mt-2 bg-purple-100 p-4 rounded text-black font-semibold max-w-sm">
-            Inaccessible sidewalks impact how disabled travellers plan their trips.
-          </div>
-        </div>
-
-        {/* Nick's Story */}
-        <div>
-          <h3 className="text-xl font-bold text-darkPurple">Nick <span className="text-black font-normal">Liberty Lake, WA</span></h3>
-          <p className="mt-1">
-            Nick wishes there were <strong>tactile markings</strong>... so he could navigate from one end to the other without getting disoriented.
-          </p>
-          <p className="mt-2 italic border-l-4 border-tcatTeal pl-4">
-            “I used to drive, and the thing I don’t think people...”
-          </p>
-          <div className="mt-2 bg-purple-100 p-4 rounded text-black font-semibold max-w-sm">
-            A lack of tactile wayfinding results in inaccurate navigation.
-          </div>
-        </div>
       </div>
     </div>
   );

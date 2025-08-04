@@ -5,7 +5,7 @@ export default function InteractiveCardDeck() {
   const [data, setData] = useState(null);
 
   useEffect(() => {
-    fetch("/cards.json")
+    fetch("./cards.json")
       .then((res) => res.json())
       .then((json) => {
         setData(json);});

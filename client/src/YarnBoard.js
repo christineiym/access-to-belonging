@@ -28,7 +28,7 @@ export default function YarnBoard() {
     // axios.get('http://localhost:3001/connections').then(res => {
     //   setConnections(res.data);
     // });
-    fetch("/cards.json")
+    fetch("./demo.json")
       .then((res) => res.json())
       .then((json) => {
         setConnections(json);});

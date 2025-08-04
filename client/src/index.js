@@ -11,9 +11,9 @@ root.render(
   <React.StrictMode>
     <Router>
       <Routes>
-        <Route path="/" element={<App />} />
-        <Route path="/stories" element={<PanelB />} />
-        <Route path="/routes-and-timing" element={<PanelC />} />
+        <Route path="/access-to-belonging" element={<App />} />
+        <Route path="/access-to-belonging/stories" element={<PanelB />} />
+        <Route path="/access-to-belonging/routes-and-timing" element={<PanelC />} />
       </Routes>
     </Router>
   </React.StrictMode>
