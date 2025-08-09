@@ -32,7 +32,7 @@ export default function PanelA() {
       </div>
 
       {/* Teal Circle with Text */}
-      <div className="absolute right-4 top-[200px] w-80 h-80 bg-tcatTeal text-black rounded-full flex items-center justify-center p-6 shadow-lg">
+      <div className="absolute right-4 w-80 h-80 bg-tcatTeal text-black rounded-full flex items-center justify-center p-6 shadow-lg">
         <p className="font-medium">
           Read these real stories from the groundbreaking report <strong>Transportation Access for Everyone: Washington State</strong> by the Disability Mobility Initiative and Disability Rights Washington.
         </p>
@@ -58,16 +58,6 @@ export default function PanelA() {
           What makes a transportation system <strong>accessible, comfortable, and reliable</strong> for disabled community members? Let’s look next at what real transit riders across Washington have to say.
         </p>
       </div>
-
-      {/* Footer with QR and Logo */}
-      {/* <div className="flex justify-between items-center w-full max-w-[700px] px-4">
-        <div className="w-20 h-20 bg-purple-700 rounded-full flex items-center justify-center text-white text-xs text-center p-2">
-          TCAT<br />logo
-        </div>
-        <div className="w-24 h-24 bg-white border border-black flex items-center justify-center text-center text-xs p-1">
-          QR<br />Sign-up
-        </div>
-      </div> */}
 
       {/* NEXT Button (animated in). */}
       <div

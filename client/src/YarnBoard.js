@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 
 const leftLabels = ['Wheelchair User', 'Cyclist', 'Avid Walker', 'Parent with a stroller', 'Transit Rider'];
@@ -157,11 +157,14 @@ export default function YarnBoard() {
     }
     setDragging(null);
     setPreview(null);
+    renderPreviewLine();
   };
 
   const handleMouseMove = (e) => {
-    if (dragging) {
-      setPreview({ x: e.clientX, y: e.clientY });
+    if (dragging && parentRef.current) {
+      let currentSvg = parentRef.current.querySelector(`#connectionSvg`);
+      let currentSvgDims = currentSvg.getBoundingClientRect();
+      setPreview({ x: e.clientX - currentSvgDims.left, y: e.clientY - currentSvgDims.top});
     }
   };
 
@@ -195,18 +198,19 @@ export default function YarnBoard() {
       dot = (
         <div className={`dot items-center gap-2 ${side === 'left' ? 'flex flex-row-reverse' : 'flex'}`} key={key}>
           <div
-            tabIndex={0}
+            // tabIndex={0}
             id={key}
             // role="button"
-            aria-label={getConnectionCountMessage(side, index)}
+            // aria-label={getConnectionCountMessage(side, index)}
             // onClick={() => handleClick(side, index)}
             // onMouseDown={() => handleMouseDown(side, index)}
             // onMouseUp={() => handleMouseUp(side, index)}
             // onMouseEnter={() => setHovered({ side, index })}
             // onMouseLeave={() => setHovered(null)}
-            className={`w-6 h-6 rounded-full border-4 ${
-              isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
-            } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
+            className={`w-6 h-6 rounded-full border-4 border-gray-400`}
+            // className={`w-6 h-6 rounded-full border-4 ${
+            //   isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
+            // } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
           />
           <span>{side === 'left' ? leftLabels[index] : rightLabels[index]}</span>
         </div>
@@ -217,6 +221,7 @@ export default function YarnBoard() {
 
   const renderConnections = (set) => {
     return set.map((connectionInfo, connectionIndex) => {
+      console.log(connectionInfo);
       let leftIndex = connectionInfo.fromDot;
       let rightIndex = connectionInfo.toDot;
 
@@ -228,8 +233,15 @@ export default function YarnBoard() {
       // console.log(`connection ${connectionIndex}: from ${leftIndex} to ${rightIndex}`)
       // console.log(`line ${connectionIndex}: (${current_x1},${current_y1}) to (${current_x2},${current_y2})`);
 
+      // className={`w-6 h-6 rounded-full border-4 ${
+      //   isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
+      // } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
+      // styilize focus
+
       return (
         <line
+          tabIndex={0}
+          aria-label={`connection ${connectionIndex}: from ${leftIndex} to ${rightIndex}`}
           key={connectionIndex}
           x1={current_x1}
           y1={current_y1}
@@ -244,18 +256,19 @@ export default function YarnBoard() {
 
   // const memoizedRenderConnections = useCallback(renderConnections, []);
 
-  // TODO: fix!!
   const renderPreviewLine = () => {
     if (!dragging || !preview) return null;
-    // const from = dotRefs.current[`${dragging.side}-${dragging.index}`]?.getBoundingClientRect();
-    const from = getDotByLocation(dragging.side, dragging.index)?.getBoundingClientRect();
-    if (!from) return null;
+
+    let from_x = dragging.side === 'left' ? 0 : 100;
+    let from_y = 22 + dragging.index * 20;
+    console.log("moving", preview.x, preview.y);
+
     return (
       <line
-        x1={from.left + 12}
-        y1={from.top + 12 + window.scrollY}
-        x2={preview.x}
-        y2={preview.y + window.scrollY}
+        x1={from_x}
+        y1={from_y}
+        x2={preview.x / 343}
+        y2={preview.y - (6.5 + (56 * (dragging.index + 2)))}
         stroke="blue"
         strokeWidth={2}
         strokeDasharray="5,5"
