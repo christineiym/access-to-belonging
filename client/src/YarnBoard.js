@@ -1,12 +1,12 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 
-const leftLabels = ['Wheelchair User', 'Cyclist', 'Avid Walker', 'Parent with a stroller', 'Transit Rider'];
-const rightLabels = ['Lack of lighting', 'Large cracks', 'No curb ramps', 'Steep inclines', 'Confusing wayfinding'];
+// TODO: fetch from db
+const leftLabels = ['Wheelchair User', 'Cyclist', 'Avid Walker', 'Parent with a stroller', 'Transit Rider', 'White-Cane User'];
+const rightLabels = ['Lack of lighting', 'Large cracks', 'No curb ramps', 'Steep inclines', 'Confusing wayfinding', 'No tactile-paving', 'No audible pedestrian signal'];
 
 export default function YarnBoard() {
   const [mode, setMode] = useState(localStorage.getItem('hasSubmitted') ? 'view' : 'edit');
-  // const [mode, setMode] = useState(null);
   const [connections, setConnections] = useState([]);
   const [sessionConnections, setSessionConnections] = useState([]);
   const [selected, setSelected] = useState(null);
@@ -14,8 +14,6 @@ export default function YarnBoard() {
   const [popup, setPopup] = useState(false);
   const [hovered, setHovered] = useState(null);
   const [dragging, setDragging] = useState(null);
-  const [preview, setPreview] = useState(null);
-  // const [svgDimensions, setSvgDimensions] = useState(null);
 
   const parentRef = useRef(null);
 
@@ -42,91 +40,47 @@ export default function YarnBoard() {
         dot = subElement;
       }
     } else {
-      console.log("not current");
+      console.log("Can't locate dot container;");
     }
     return dot;
   };
 
-  const speak = (msg) => { // should only call when focus changes
-    // const utter = new SpeechSynthesisUtterance(msg);
-    // window.speechSynthesis.speak(utter);
-    const currentDot = getDotByLocation(focus.side, focus.index);
-    currentDot.setAttribute('aria-label', msg);
-    // reset label afterward
-  };
-
-  const actuallyFocus = ({side, index}) => {
-    // how to make this atomic?
+  const actuallyFocusDot = ({side, index}) => {
     console.log(`Current focus: ${side}-${index}`);
-    setFocus({side, index});  // apparently there's some sort of asynchronization going on here
+    setFocus({side, index});
     const currentDot = getDotByLocation(side, index);
     currentDot.focus({ preventScroll: true, focusVisible: true });
   }
 
-  const handleKey = (e) => {
-    // e.preventDefault();
+  const actuallyFocusConnection = ({connectionIndex}) => {
+    setFocus({connectionIndex});
+    const currentConnection = []; // ??
+    currentConnection.focus({ preventScroll: true, focusVisible: true });
+  }
+
+  const handleKey = (e) => { // TODO: add connection nav. Also allow nav to bottom button?. Include other?
     const currentLabels = focus.side === 'left' ? leftLabels : rightLabels;
     const otherSide = focus.side === 'left' ? 'right' : 'left';
 
     if (e.key === 'ArrowDown') {
-      actuallyFocus({ ...focus, index: (focus.index + 1) % currentLabels.length });  // what about speaking?
+      actuallyFocusDot({ ...focus, index: (focus.index + 1) % currentLabels.length });  // what about speaking?
     } else if (e.key === 'ArrowUp') {
-      actuallyFocus({ ...focus, index: (focus.index - 1 + currentLabels.length) % currentLabels.length });
+      actuallyFocusDot({ ...focus, index: (focus.index - 1 + currentLabels.length) % currentLabels.length });
     } else if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
       const newIndex = Math.min(focus.index, otherSide === 'left' ? leftLabels.length - 1 : rightLabels.length - 1);
-      actuallyFocus({ side: otherSide, index: newIndex });
-      if (selected) {
-        const label = otherSide === 'left' ? leftLabels[newIndex] : rightLabels[newIndex];
-        speak(`${label}. Press Enter to finish connection.`);
-      }
-    } else if (e.key === 'Enter') {
-      actuallyFocus({ ...focus});
-
-      if (!selected) {
-        setSelected(focus);
-        speak(`${currentLabels[focus.index]} is selected. Go ${otherSide} to complete a connection.`);
-      } else if (selected.side !== focus.side) {
-        const from = selected.side === 'left' ? selected.index : focus.index;
-        const to = selected.side === 'left' ? focus.index : selected.index;
-        setSessionConnections([...sessionConnections, { from, to }]);
-        speak(`Connection between ${leftLabels[from]} and ${rightLabels[to]} is completed.`);
-        setSelected(null);
-      } else {
-        setSelected(null);
-        speak('Selection cleared.');
-      }
-    } else if (e.key === 'Backspace' || e.key === 'Delete') {
-      actuallyFocus({ ...focus});
-      if (mode === 'edit') {
-        const from = selected?.side === 'left' ? selected.index : focus.index;
-        const to = selected?.side === 'left' ? focus.index : selected.index;
-        setSessionConnections(sessionConnections.filter(c => !(c.from === from && c.to === to)));
-        setSelected(null);
-        speak(`Connection removed.`);
-      }
+      actuallyFocusDot({ side: otherSide, index: newIndex });
     }
   };
 
-  const handleClick = (side, index) => {
-    actuallyFocus({side, index});
-    if (!selected) {
-      setSelected({ side, index });
-      speak(`${(side === 'left' ? leftLabels : rightLabels)[index]} is selected. Go ${side === 'left' ? 'right' : 'left'} to complete a connection.`);
-    } else if (selected.side !== side) {
-      const from = selected.side === 'left' ? selected.index : index;
-      const to = selected.side === 'left' ? index : selected.index;
-      setSessionConnections([...sessionConnections, { from, to }]);
-      speak(`Connection between ${leftLabels[from]} and ${rightLabels[to]} is completed.`);
-      setSelected(null);
-    } else {
-      setSelected(null);
-      speak('Selection cleared.');
-    }
+  // show connecton number. What about hover? temporarily flash, instead. Also: highlight (but don't change focus)
+  const handleClick = (connectionIndex) => {
+    actuallyFocusConnection({connectionIndex});
+    // console.log(getConnectionCount)
   };
 
-  const clearConnections = () => setSessionConnections([]);
+//   const clearConnections = () => setSessionConnections([]);
 
-  const handleSubmit = async () => {
+  const handleSubmit = async () => {  // TODO: update according to input form; change to base
     console.log()
     try {
       await Promise.all(
@@ -145,79 +99,19 @@ export default function YarnBoard() {
     }
   };
 
-  const handleMouseDown = (side, index) => {
-    setDragging({ side, index });
-  };
-
-  const handleMouseUp = (side, index) => {
-    if (dragging && dragging.side !== side) {
-      const from = dragging.side === 'left' ? dragging.index : index;
-      const to = dragging.side === 'left' ? index : dragging.index;
-      setSessionConnections([...sessionConnections, { from, to }]);
-    }
-    setDragging(null);
-    setPreview(null);
-    renderPreviewLine();
-  };
-
-  const handleMouseMove = (e) => {
-    if (dragging && parentRef.current) {
-      let currentSvg = parentRef.current.querySelector(`#connectionSvg`);
-      let currentSvgDims = currentSvg.getBoundingClientRect();
-      setPreview({ x: e.clientX - currentSvgDims.left, y: e.clientY - currentSvgDims.top});
-    }
-  };
-
   const renderDotHtml = (side, index) => {
-    const isSelected = selected?.side === side && selected.index === index;
-    const isFocused = focus.side === side && focus.index === index;
     const key = `${side}-${index}`;
 
-    let dot;
-    if (mode === 'edit') {
-      dot = (
+    return ( // how to mark decorative?
         <div className={`dot items-center gap-2 ${side === 'left' ? 'flex flex-row-reverse' : 'flex'}`} key={key}>
           <div
-            tabIndex={0}
             id={key}
-            role="button"
-            aria-label={`${side === 'left' ? leftLabels[index] : rightLabels[index]}`}
-            onClick={() => handleClick(side, index)}
-            onMouseDown={() => handleMouseDown(side, index)}
-            onMouseUp={() => handleMouseUp(side, index)}
-            onMouseEnter={() => setHovered({ side, index })}
-            onMouseLeave={() => setHovered(null)}
-            className={`w-6 h-6 rounded-full border-4 ${
-              isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
-            } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
-          />
-          <span>{side === 'left' ? leftLabels[index] : rightLabels[index]}</span>
-        </div>
-      );
-    } else {
-      dot = (
-        <div className={`dot items-center gap-2 ${side === 'left' ? 'flex flex-row-reverse' : 'flex'}`} key={key}>
-          <div
-            // tabIndex={0}
-            id={key}
-            // role="button"
-            // aria-label={getConnectionCountMessage(side, index)}
-            // onClick={() => handleClick(side, index)}
-            // onMouseDown={() => handleMouseDown(side, index)}
-            // onMouseUp={() => handleMouseUp(side, index)}
-            // onMouseEnter={() => setHovered({ side, index })}
-            // onMouseLeave={() => setHovered(null)}
             className={`w-6 h-6 rounded-full border-4 border-gray-400`}
-            // className={`w-6 h-6 rounded-full border-4 ${
-            //   isSelected ? 'border-purple-600' : hovered?.side === side && hovered.index === index ? 'border-blue-400' : 'border-gray-400'
-            // } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
           />
           <span>{side === 'left' ? leftLabels[index] : rightLabels[index]}</span>
         </div>
       );
-    }
-    return dot;
-  };
+  }
 
   const renderConnections = (set) => {
     return set.map((connectionInfo, connectionIndex) => {
@@ -238,10 +132,15 @@ export default function YarnBoard() {
       // } bg-white cursor-pointer ${isFocused ? 'ring-2 ring-black' : ''}`}
       // styilize focus
 
+      /**
+       * TODO:
+       * label
+       * mouse hover/click (and change focus)
+       */
       return (
         <line
           tabIndex={0}
-          aria-label={`connection ${connectionIndex}: from ${leftIndex} to ${rightIndex}`}
+          aria-label={`${leftIndex} to ${rightIndex}, ${getConnectionCountMessage(leftIndex, rightIndex)} connections.`}
           key={connectionIndex}
           x1={current_x1}
           y1={current_y1}
@@ -254,85 +153,77 @@ export default function YarnBoard() {
     });
   };
 
-  // const memoizedRenderConnections = useCallback(renderConnections, []);
-
-  const renderPreviewLine = () => {
-    if (!dragging || !preview) return null;
-
-    let from_x = dragging.side === 'left' ? 0 : 100;
-    let from_y = 22 + dragging.index * 20;
-    console.log("moving", preview.x, preview.y);
-
-    return (
-      <line
-        x1={from_x}
-        y1={from_y}
-        x2={preview.x / 343}
-        y2={preview.y - (6.5 + (56 * (dragging.index + 2)))}
-        stroke="blue"
-        strokeWidth={2}
-        strokeDasharray="5,5"
-      />
-    );
-  };
-
-  const getConnectionCountMessage = (side, index) => { // apparently left is from, right is to
+  // TODO: replace from the result of an aggregate call to the db!!
+  const getConnectionCount = (leftIndex, rightIndex) => { // left is from, right is to
     const count = side === 'left'
       ? connections.filter(c => c.from === index).length
       : connections.filter(c => c.to === index).length;
-    const label = side === 'left' ? leftLabels[index] : rightLabels[index];
-    const text = `${count} connections to ${label}`;
-    return text;
+    return count;
   }
 
   const toggleMode = () => {
     mode === 'edit' ? setMode('view') : setMode('edit');
   }
 
-  return (
-    <div className="h-[450px]">
-      <div className="relative p-10 flex justify-center gap-0 h-[370px]" onKeyDown={handleKey} onMouseMove={handleMouseMove} ref={parentRef}>
-        <div className="flex flex-col gap-8 z-10" style={{"white-space": "nowrap"}}>
-          <p className='text-left text-xl'><strong>I am a…</strong></p>
-          {leftLabels.map((_, i) => (
-            renderDotHtml('left', i)
-          ))}
+  // put ref in edit?
+  if (mode === 'edit') {
+    return (
+        <div className="h-[450px]">
+             <div className="relative p-10 flex justify-center gap-0 h-[370px]">
+                <input>
+                    {/* # an input field with drop-down and checkbox (and optional other). Submit button. */}
+                </input>
+                <div className="flex">
+                    
+                </div>
+             </div>
+             <div>
+                <div className='flex justify-center pl-10 pr-10'>
+                    <button onClick={toggleMode()} className="bg-red-600 text-white px-4 py-2 rounded">Cancel</button>
+                    <button onClick={handleSubmit} className="bg-purple-600 text-white px-4 py-2 rounded">Submit</button>
+                </div>
+             </div>
         </div>
+    );
+  } else {
+    return (
+        <div className="h-[450px]">
+            <div className="relative p-10 flex justify-center gap-0 h-[370px]" onKeyDown={handleKey} onMouseMove={handleMouseMove} ref={parentRef}>
+                <div className="flex flex-col gap-8 z-10" style={{"white-space": "nowrap"}}>
+                    <p className='text-left text-xl'><strong>I am a…</strong></p> 
+                    {/* list title? */}
+                    <ul>
+                        {leftLabels.map((_, i) => (
+                            <li>${renderDotHtml('left', i)}</li>
+                        ))}
+                    </ul>
+                </div>
 
-        <div className="flex pt-2.5 z-0 min-w-[30%]">
-          <svg id="connectionSvg" overflow="visible" viewBox="0 0 100 100" preserveAspectRatio="none" alt=""
-            className="z-0 w-full h-full pointer-events-none">
-            {mode === 'edit' && renderConnections(sessionConnections)}
-            {mode === 'view' && renderConnections(connections)}
-            {renderPreviewLine()}
-          </svg>
-        </div>
+                {/* set order to 3 */}
+                <div className="flex pt-2.5 z-0 min-w-[30%]">
+                    <svg id="connectionSvg" overflow="visible" viewBox="0 0 100 100" preserveAspectRatio="none" alt=""
+                        className="z-0 w-full h-full pointer-events-none">
+                        {mode === 'view' && renderConnections(connections)}
+                    </svg>
+                </div>
 
-        <div className="flex flex-col gap-8 z-10" style={{"white-space": "nowrap"}}>
-          <p className='text-left text-xl'><strong>Barriers I experience…</strong></p>
-          {rightLabels.map((_, i) => (
-            renderDotHtml('right', i)
-          ))}
-        </div>
-      </div>
-
-      {/* Buttons and popup, formerly in "absolute bottom-6 right-6 flex gap-4" */}
-      <div>
-        {mode === 'view'
-          ? <div className='flex justify-center pl-10 pr-10'>
-              <button onClick={toggleMode} className="bg-purple-600 text-white px-4 py-2 rounded">Begin New Submission</button>
+                <div className="flex flex-col gap-8 z-10" style={{"white-space": "nowrap"}}>
+                    <p className='text-left text-xl'><strong>Barriers I experience…</strong></p> 
+                    {/* list title? */}
+                    <ul>
+                        {rightLabels.map((_, i) => (
+                            <li>${renderDotHtml('right', i)}</li>
+                        ))}
+                    </ul>
+                </div>
             </div>
-          : <div className='flex justify-center pl-10 pr-10'>
-              {/* <button onClick={toggleMode()} className="bg-purple-600 text-white px-4 py-2 rounded">Cancel</button> */}
-              <button onClick={clearConnections} className="bg-gray-300 px-4 py-2 rounded">Clear All</button>
-              <button onClick={handleSubmit} className="bg-purple-600 text-white px-4 py-2 rounded">Submit</button>
-            </div>
-        }
 
-        {popup && ( // TODO: go away
-          <div className="w-[220px] bg-white border p-4 rounded shadow">Thank you for submitting!</div>
-        )}
-      </div>
-    </div>
-  );
-};
+            <div>
+                <div className='flex justify-center pl-10 pr-10'>
+                    <button onClick={toggleMode} className="bg-purple-600 text-white px-4 py-2 rounded">New Submission</button>
+                </div>
+            </div>
+        </div>
+    );
+  };
+}

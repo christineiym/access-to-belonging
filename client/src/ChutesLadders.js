@@ -55,32 +55,8 @@ export default function ChutesLadders() {
                 })}
             </div>
 
-            {/* Cards (right or left?) */}
+            {/* Cards */}
             <InteractiveCards></InteractiveCards>
-
-            {/* Placeholder Cards */}
-            {/* <div className="flex flex-row md:flex-col gap-12 items-start p-6">
-                <div className="flex flex-col items-center relative">
-                    <div className="bg-tcatTeal w-32 text-sm font-bold px-3 py-1 rounded-t-md">
-                        Draw a persona card!
-                    </div>
-                    <div className="w-32 h-48 bg-darkPurple text-white flex flex-col items-center justify-center text-center mt-2 shadow-md rounded-md">
-                        <p className="font-bold text-lg">Persona Card</p>
-                        <div className="mt-2 text-xs">TCAT logo</div>
-                    </div>
-                </div>
-
-                <div className="flex flex-col items-center relative">
-                    <div className="bg-tcatTeal w-32 text-sm font-bold px-3 py-1 rounded-t-md">
-                        Draw a scenario card!
-                    </div>
-                    <div className="w-32 h-48 bg-darkPurple text-white flex flex-col items-center justify-center text-center mt-2 shadow-md rounded-md">
-                        <p className="font-bold text-lg">Scenario Card</p>
-                        <div className="mt-2 text-xs">TCAT logo</div>
-                    </div>
-                </div>
-            </div> */}
-            
         </div>
     )
 }
