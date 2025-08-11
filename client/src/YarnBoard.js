@@ -4,10 +4,15 @@ import axios from 'axios';
 // TODO: fetch from db
 const leftLabels = ['Wheelchair User', 'Cyclist', 'Avid Walker', 'Parent with a stroller', 'Transit Rider', 'White-Cane User'];
 const rightLabels = ['Lack of lighting', 'Large cracks', 'No curb ramps', 'Steep inclines', 'Confusing wayfinding', 'No tactile-paving', 'No audible pedestrian signal'];
+// const rightLabels = ['Lack of lighting', 'Large cracks', 'No curb ramps', 'Steep inclines'];
+const listGapHtml = 28;
+const listGapSvg = 20;
+const maxLen = (leftLabels.length >= rightLabels.length) ? leftLabels.length : rightLabels.length;
 
 export default function YarnBoard() {
-  const [mode, setMode] = useState(localStorage.getItem('hasSubmitted') ? 'view' : 'edit');
+  const [mode, setMode] = useState(localStorage.getItem('mode') || 'view');  // vs. edit? what if they were in the middle of editing?
   const [connections, setConnections] = useState([]);
+  const [groupedConnections, setGroupedConnections] = useState([]);
   const [sessionConnections, setSessionConnections] = useState([]);
   const [selected, setSelected] = useState(null);
   const [focus, setFocus] = useState({ side: 'left', index: 0 });
@@ -16,20 +21,33 @@ export default function YarnBoard() {
   const [dragging, setDragging] = useState(null);
 
   const parentRef = useRef(null);
+  const aggregateConnections = (data) => {
+    let counts = {};
+
+    data.forEach(item => {
+        let key = JSON.stringify(item);
+        counts[key] = (counts[key] || 0) + 1;
+    });
+
+    let result = Object.entries(counts).map(([key, count]) => ({
+        ...JSON.parse(key),
+        count
+    })).sort((a, b) => a.fromDot - b.fromDot || a.toDot - b.toDot);
+    return result;
+  }
 
   useEffect(() => {
-    setMode("view");
-  }, []);
-
-  useEffect(() => {
-    // TODO: Change to actual connections in production
+    // TODO: Change to actual connections in production (will need to set state) - as aggregate
     // axios.get('http://localhost:3001/connections').then(res => {
     //   setConnections(res.data);
     // });
     fetch("./demo.json")
       .then((res) => res.json())
-      .then((json) => {
-        setConnections(json);});
+      .then((json) => setGroupedConnections(aggregateConnections(json)));
+  }, [mode]);
+
+  useEffect(() => {
+    localStorage.setItem('mode', mode);
   }, [mode]);
 
   const getDotByLocation = (side, index) => {
@@ -81,7 +99,7 @@ export default function YarnBoard() {
 //   const clearConnections = () => setSessionConnections([]);
 
   const handleSubmit = async () => {  // TODO: update according to input form; change to base
-    console.log()
+    console.log("submitted")
     try {
       await Promise.all(
         sessionConnections.map(({ from, to }) => {
@@ -99,30 +117,30 @@ export default function YarnBoard() {
     }
   };
 
-  const renderDotHtml = (side, index) => {
+  const renderDotListItem = (side, index) => {
     const key = `${side}-${index}`;
 
     return ( // how to mark decorative?
-        <div className={`dot items-center gap-2 ${side === 'left' ? 'flex flex-row-reverse' : 'flex'}`} key={key}>
+        <li className={`dot items-center gap-2 ${side === 'left' ? 'flex flex-row-reverse' : 'flex'}`} key={key}>
           <div
-            id={key}
+            id={key} aria-hidden="true"
             className={`w-6 h-6 rounded-full border-4 border-gray-400`}
           />
           <span>{side === 'left' ? leftLabels[index] : rightLabels[index]}</span>
-        </div>
+        </li>
       );
   }
 
   const renderConnections = (set) => {
-    return set.map((connectionInfo, connectionIndex) => {
-      console.log(connectionInfo);
-      let leftIndex = connectionInfo.fromDot;
-      let rightIndex = connectionInfo.toDot;
+    let aggregatedSet = aggregateConnections(set);
+    return aggregatedSet.map((item) => {
+      let leftIndex = item.fromDot;
+      let rightIndex = item.toDot;
 
       let current_x1 = 0;
-      let current_y1 = 22 + leftIndex * 20;
+      let current_y1 = listGapSvg + leftIndex * listGapSvg;
       let current_x2 = 100;
-      let current_y2 = 22 + rightIndex * 20;
+      let current_y2 = listGapSvg + rightIndex * listGapSvg;
 
       // console.log(`connection ${connectionIndex}: from ${leftIndex} to ${rightIndex}`)
       // console.log(`line ${connectionIndex}: (${current_x1},${current_y1}) to (${current_x2},${current_y2})`);
@@ -136,12 +154,12 @@ export default function YarnBoard() {
        * TODO:
        * label
        * mouse hover/click (and change focus)
+       * thicker
        */
       return (
         <line
           tabIndex={0}
-          aria-label={`${leftIndex} to ${rightIndex}, ${getConnectionCountMessage(leftIndex, rightIndex)} connections.`}
-          key={connectionIndex}
+          aria-label={`${leftLabels[leftIndex]} to ${rightLabels[rightIndex]}, ${item.count} connections.`}
           x1={current_x1}
           y1={current_y1}
           x2={current_x2}
@@ -153,77 +171,72 @@ export default function YarnBoard() {
     });
   };
 
-  // TODO: replace from the result of an aggregate call to the db!!
-  const getConnectionCount = (leftIndex, rightIndex) => { // left is from, right is to
-    const count = side === 'left'
-      ? connections.filter(c => c.from === index).length
-      : connections.filter(c => c.to === index).length;
-    return count;
-  }
-
   const toggleMode = () => {
     mode === 'edit' ? setMode('view') : setMode('edit');
   }
 
   // put ref in edit?
-  if (mode === 'edit') {
-    return (
-        <div className="h-[450px]">
-             <div className="relative p-10 flex justify-center gap-0 h-[370px]">
-                <input>
-                    {/* # an input field with drop-down and checkbox (and optional other). Submit button. */}
-                </input>
-                <div className="flex">
-                    
-                </div>
-             </div>
-             <div>
-                <div className='flex justify-center pl-10 pr-10'>
-                    <button onClick={toggleMode()} className="bg-red-600 text-white px-4 py-2 rounded">Cancel</button>
-                    <button onClick={handleSubmit} className="bg-purple-600 text-white px-4 py-2 rounded">Submit</button>
-                </div>
-             </div>
+  return(
+    <div>
+      {mode === 'view' && (
+        <div>
+          <div className="relative p-10 flex justify-center gap-0" onKeyDown={handleKey} ref={parentRef}>
+              <div className={`flex flex-col gap-[${listGapHtml}px] h-[${28 + maxLen * 52}px]`} style={{"white-space": "nowrap"}}>
+                  <p className='text-left text-xl'><strong>I am a…</strong></p> 
+                  {/* list title? */}
+                  <ul className={`flex flex-col gap-[${listGapHtml}px]`} style={{"white-space": "nowrap"}}>
+                      {leftLabels.map((_, i) => (
+                          renderDotListItem('left', i)
+                      ))}
+                  </ul>
+              </div>
+
+              {/* set order to 3 */}
+              <div className={`flex mt-4 z-0 min-w-[30%]`}>
+                  <svg id="connectionSvg" height={`${maxLen * 52}px`} overflow="visible" viewBox={`0 0 100 ${maxLen * listGapSvg}`} preserveAspectRatio="none" alt=""
+                      className={`z-0 w-full`}>
+                      {renderConnections(groupedConnections)}
+                  </svg>
+              </div>
+
+              <div className={`flex flex-col gap-[${listGapHtml}px] h-[${28 + maxLen * 52}px]`} style={{"white-space": "nowrap"}}>
+                  <p className='text-left text-xl'><strong>Barriers I experience…</strong></p> 
+                  {/* list title? */}
+                  <ul className={`flex flex-col gap-[${listGapHtml}px]`} style={{"white-space": "nowrap"}}>
+                      {rightLabels.map((_, i) => (
+                          renderDotListItem('right', i)
+                      ))}
+                  </ul>
+              </div>
+          </div>
+
+          <div>
+              <div className='flex justify-center pl-10 pr-10'>
+                  <button onClick={() => toggleMode()} className="bg-purple-600 text-white px-4 py-2 rounded">New Submission</button>
+              </div>
+          </div>
         </div>
-    );
-  } else {
-    return (
+      )}
+      {mode === 'edit' && (
         <div className="h-[450px]">
-            <div className="relative p-10 flex justify-center gap-0 h-[370px]" onKeyDown={handleKey} onMouseMove={handleMouseMove} ref={parentRef}>
-                <div className="flex flex-col gap-8 z-10" style={{"white-space": "nowrap"}}>
-                    <p className='text-left text-xl'><strong>I am a…</strong></p> 
-                    {/* list title? */}
-                    <ul>
-                        {leftLabels.map((_, i) => (
-                            <li>${renderDotHtml('left', i)}</li>
-                        ))}
-                    </ul>
-                </div>
 
-                {/* set order to 3 */}
-                <div className="flex pt-2.5 z-0 min-w-[30%]">
-                    <svg id="connectionSvg" overflow="visible" viewBox="0 0 100 100" preserveAspectRatio="none" alt=""
-                        className="z-0 w-full h-full pointer-events-none">
-                        {mode === 'view' && renderConnections(connections)}
-                    </svg>
-                </div>
-
-                <div className="flex flex-col gap-8 z-10" style={{"white-space": "nowrap"}}>
-                    <p className='text-left text-xl'><strong>Barriers I experience…</strong></p> 
-                    {/* list title? */}
-                    <ul>
-                        {rightLabels.map((_, i) => (
-                            <li>${renderDotHtml('right', i)}</li>
-                        ))}
-                    </ul>
-                </div>
-            </div>
-
-            <div>
-                <div className='flex justify-center pl-10 pr-10'>
-                    <button onClick={toggleMode} className="bg-purple-600 text-white px-4 py-2 rounded">New Submission</button>
-                </div>
-            </div>
+          <div>
+              <div className='flex justify-center pl-10 pr-10'>
+                  <button onClick={() => handleSubmit()} className="bg-red-600 text-white px-4 py-2 rounded">Cancel</button>
+                  <button onClick={() => handleSubmit()} className="bg-purple-600 text-white px-4 py-2 rounded">Submit</button>
+              </div>
+          </div>
         </div>
-    );
-  };
+      )}
+    </div>
+  );
 }
+
+          // <div className="relative p-10 flex justify-center gap-0 h-[370px]">
+          //     <input>
+          //         {/* # an input field with drop-down and checkbox (and optional other). Submit button. */}
+          //     </input>
+          //     <div className="flex">
+                  
+          //     </div>
+          // </div>
