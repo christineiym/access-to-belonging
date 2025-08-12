@@ -26,8 +26,8 @@ export default function PanelA() {
   return (
     <div className="relative min-h-screen bg-white font-sans text-black">
       {/* Purple Top Section */}
-      <div className="relative top-0 bg-darkPurple text-white py-16 px-6 rounded-b-[50%] text-center shadow-lg">
-        <h1 className="text-7xl font-extrabold">Access <br></br>To Belonging</h1>
+      <div className="relative top-0 bg-darkPurple text-white py-16 px-6 rounded-b-[40%] text-center shadow-lg">
+        <h1 className="text-7xl font-extrabold">Access To Belonging</h1>
         {/* <h2 className="text-5xl mt-2 font-semibold">To Belonging</h2> */}
       </div>
 
@@ -53,7 +53,7 @@ export default function PanelA() {
       <ChutesLadders></ChutesLadders>
 
       {/* Circle with text */}
-      <div className="relative m-20 bottom+40 max-w-[400px] aspect-square rounded-full bg-purple-200 flex items-center justify-center text-center p-10 shadow-lg">
+      <div className="relative m-20 max-w-[400px] aspect-square rounded-full bg-purple-200 flex items-center justify-center text-center p-10 shadow-lg">
         <p className="text-lg sm:text-xl md:text-2xl font-medium">
           What makes a transportation system <strong>accessible, comfortable, and reliable</strong> for disabled community members? Let’s look next at what real transit riders across Washington have to say.
         </p>

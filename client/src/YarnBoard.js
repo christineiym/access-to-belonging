@@ -15,7 +15,7 @@ export default function YarnBoard() {
   const [groupedConnections, setGroupedConnections] = useState([]);
   const [sessionConnections, setSessionConnections] = useState([]);
   const [selected, setSelected] = useState(null);
-  const [focus, setFocus] = useState({ side: 'left', index: 0 });
+  const [focus, setFocus] = useState({ side: 'left', index: -1 });  // Set initial focus to "none"
   const [popup, setPopup] = useState(false);
   const [hoveredConnection, setHoveredConnection] = useState(null);
   const [focusedConnection, setFocusedConnection] = useState(null);
@@ -273,12 +273,11 @@ export default function YarnBoard() {
         role="listitem"
         aria-label={label}
         className={`dot items-center gap-2 ${side === 'left' ? 'flex flex-row-reverse' : 'flex'} outline-none
-          ${isFocused ? 'ring-2 ring-purple-600 ring-offset-2' : ''}
+          ${isFocused ? 'ring-2 ring-purple-600 ring-offset-2' : ''} h-[52px]
         `}
         onFocus={() => actuallyFocusItem({ side, index })}
         onClick={() => actuallyFocusItem({ side, index })}
         onBlur={e => {
-          // If focus moves outside the parentRef, clear focus
           setTimeout(() => {
             if (
               parentRef.current &&
@@ -376,19 +375,18 @@ export default function YarnBoard() {
   return(
     <div>
       {mode === 'view' && (
-        <div>
+        <div className='overflow-y-auto'>
           <div className="relative p-10 flex justify-center gap-0" onKeyDown={handleKey} ref={parentRef}>
-              <div className={`flex flex-col gap-[${listGapHtml}px] h-[${28 + maxLen * 52}px]`} style={{"white-space": "nowrap"}}>
-                  <p className='text-left text-xl'><strong>I am a…</strong></p> 
+              <div className={`flex flex-col gap-[14px] h-[${28 + maxLen * 52}px]`}>
+                  <p className='text-center text-xl' style={{"white-space": "nowrap"}}><strong>I am a…</strong></p> 
                   {/* list title? */}
-                  <ul className={`flex flex-col gap-[${listGapHtml}px]`} style={{"white-space": "nowrap"}}>
+                  <ul className={`flex flex-col`}>
                       {leftLabels.map((_, i) => (
                           renderItem('left', i)
                       ))}
                   </ul>
               </div>
 
-              {/* set order to 3 */}
               <div className={`flex mt-4 z-0 min-w-[30%]`}>
                   <svg id="connectionSvg" height={`${maxLen * 52}px`} overflow="visible" viewBox={`0 0 100 ${maxLen * listGapSvg}`} preserveAspectRatio="none" alt=""
                       className={`z-0 w-full`}>
@@ -397,10 +395,10 @@ export default function YarnBoard() {
                   {renderConnectionTooltip()}
               </div>
 
-              <div className={`flex flex-col gap-[${listGapHtml}px] h-[${28 + maxLen * 52}px]`} style={{"white-space": "nowrap"}}>
-                  <p className='text-left text-xl'><strong>Barriers I experience…</strong></p> 
+              <div className={`flex flex-col gap-[14px] h-[${28 + maxLen * 52}px]`}>
+                  <p className='text-center text-xl' style={{"white-space": "nowrap"}}><strong>Barriers…</strong></p> 
                   {/* list title? */}
-                  <ul className={`flex flex-col gap-[${listGapHtml}px]`} style={{"white-space": "nowrap"}}>
+                  <ul className={`flex flex-col`}>
                       {rightLabels.map((_, i) => (
                           renderItem('right', i)
                       ))}

@@ -23,7 +23,7 @@ export default function PanelB() {
   }, []);
 
   return (
-    <div className="relative min-h-screen bg-white font-sans text-black pl-10 pr-10">
+    <div className="relative min-h-screen bg-white font-sans text-black">
       {/* Header */}
       <div className="text-center pt-5 m-10">
         <h1 className="text-5xl font-extrabold text-darkPurple">Community Stories</h1>
