@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
+import YarnBoardForm from './YarnBoardForm';
 
 // TODO: fetch from db
 const leftLabels = ['Wheelchair User', 'Cyclist', 'Avid Walker', 'Parent with a stroller', 'Transit Rider', 'White-Cane User'];
@@ -17,8 +18,6 @@ export default function YarnBoard() {
   const [selected, setSelected] = useState(null);
   const [focus, setFocus] = useState({ side: 'left', index: 0 });
   const [popup, setPopup] = useState(false);
-  const [hovered, setHovered] = useState(null);
-  const [dragging, setDragging] = useState(null);
 
   const parentRef = useRef(null);
   const aggregateConnections = (data) => {
@@ -90,7 +89,7 @@ export default function YarnBoard() {
     }
   };
 
-  // show connecton number. What about hover? temporarily flash, instead. Also: highlight (but don't change focus)
+  // show connection number. What about hover? temporarily flash, instead. Also: highlight (but don't change focus)
   const handleClick = (connectionIndex) => {
     actuallyFocusConnection({connectionIndex});
     // console.log(getConnectionCount)
@@ -99,7 +98,7 @@ export default function YarnBoard() {
 //   const clearConnections = () => setSessionConnections([]);
 
   const handleSubmit = async () => {  // TODO: update according to input form; change to base
-    console.log("submitted")
+    console.log("submitted");
     try {
       await Promise.all(
         sessionConnections.map(({ from, to }) => {
@@ -120,7 +119,7 @@ export default function YarnBoard() {
   const renderDotListItem = (side, index) => {
     const key = `${side}-${index}`;
 
-    return ( // how to mark decorative?
+    return (
         <li className={`dot items-center gap-2 ${side === 'left' ? 'flex flex-row-reverse' : 'flex'}`} key={key}>
           <div
             id={key} aria-hidden="true"
@@ -218,25 +217,15 @@ export default function YarnBoard() {
         </div>
       )}
       {mode === 'edit' && (
-        <div className="h-[450px]">
-
-          <div>
-              <div className='flex justify-center pl-10 pr-10'>
-                  <button onClick={() => handleSubmit()} className="bg-red-600 text-white px-4 py-2 rounded">Cancel</button>
-                  <button onClick={() => handleSubmit()} className="bg-purple-600 text-white px-4 py-2 rounded">Submit</button>
-              </div>
-          </div>
+        <div className="p-10">
+          <YarnBoardForm
+            handleSubmit={handleSubmit}
+            handleCancel={toggleMode}
+            dropdownOptions={[...leftLabels, "Other"]}
+            checkboxOptions={[...rightLabels, "Other"]}
+          />
         </div>
       )}
     </div>
   );
 }
-
-          // <div className="relative p-10 flex justify-center gap-0 h-[370px]">
-          //     <input>
-          //         {/* # an input field with drop-down and checkbox (and optional other). Submit button. */}
-          //     </input>
-          //     <div className="flex">
-                  
-          //     </div>
-          // </div>
