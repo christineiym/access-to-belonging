@@ -9,6 +9,19 @@ const listGapHtml = 28;
 const listGapSvg = 20;
 const maxLen = (leftLabels.length >= rightLabels.length) ? leftLabels.length : rightLabels.length;
 
+// Assign a color for each left-side value, using colorblind-friendly Okabe and Ito palette
+// TODO: check contrast
+const colors = [
+  "rgb(204,121,167)",  // pink
+  "rgb(213,94,0)",  // orange
+  "rgb(230,159,0)",  // lighter orange
+  "rgb(240,228,66)",  // yellow
+  "rgb(86,180,233)",  // light blue
+  "rgb(0,114,178)",  // dark blue
+  "rgb(0,158,115)",  // green
+  "rgb(0,0,0)",  // black
+];
+
 export default function YarnBoard() {
   const [mode, setMode] = useState(localStorage.getItem('mode') || 'view');  // vs. edit? what if they were in the middle of editing?
   const [connections, setConnections] = useState([]);
@@ -25,13 +38,13 @@ export default function YarnBoard() {
     let counts = {};
 
     data.forEach(item => {
-        let key = JSON.stringify(item);
-        counts[key] = (counts[key] || 0) + 1;
+      let key = JSON.stringify(item);
+      counts[key] = (counts[key] || 0) + 1;
     });
 
     let result = Object.entries(counts).map(([key, count]) => ({
-        ...JSON.parse(key),
-        count
+      ...JSON.parse(key),
+      count
     })).sort((a, b) => a.fromDot - b.fromDot || a.toDot - b.toDot);
     return result;
   }
@@ -86,18 +99,18 @@ export default function YarnBoard() {
     return item;
   };
 
-  const actuallyFocusItem = ({side, index}) => {
+  const actuallyFocusItem = ({ side, index }) => {
     console.log(`Current focus: ${side}-${index}`);
-    setFocus({side, index});
+    setFocus({ side, index });
     const currentItem = getItemByLocation(side, index);
     if (currentItem) {
       currentItem.focus({ preventScroll: true, focusVisible: true });
     }
   }
 
-  const actuallyFocusConnection = ({connectionIndex}) => {
+  const actuallyFocusConnection = ({ connectionIndex }) => {
     console.log(`Current focus: connection-${connectionIndex}`);
-    setFocus({connectionIndex});
+    setFocus({ connectionIndex });
     setFocusedConnection(connectionIndex);
     // Focus the SVG line element
     const svg = document.getElementById('connectionSvg');
@@ -150,7 +163,7 @@ export default function YarnBoard() {
         if (idx !== -1) {
           actuallyFocusConnection({ connectionIndex: idx });
         } else {
-          actuallyFocusItem({ side: 'right', index: Math.min(focus.index, rightCount - 1) }); 
+          actuallyFocusItem({ side: 'right', index: Math.min(focus.index, rightCount - 1) });
         }
       } else if (e.key === 'Tab' && !e.shiftKey) {
         // Tab from last left item to first right item
@@ -235,7 +248,7 @@ export default function YarnBoard() {
 
   // show connection number. What about hover? temporarily flash, instead. Also: highlight (but don't change focus)
   const handleClick = (connectionIndex) => {
-    actuallyFocusConnection({connectionIndex});
+    actuallyFocusConnection({ connectionIndex });
     // console.log(getConnectionCount)
   };
 
@@ -298,7 +311,7 @@ export default function YarnBoard() {
     );
   }
 
-    <li>
+  <li>
     <button aria-label="Wheelchair User" class="dot items-center gap-2 flex flex-row-reverse">
       <div aria-hidden="true" class="w-6 h-6 rounded-full border-4 border-gray-400"></div>
       <span aria-hidden="true">Wheelchair User</span>
@@ -317,6 +330,9 @@ export default function YarnBoard() {
       const isHovered = hoveredConnection === idx;
       let strokeWidth = 2 + Math.min(item.count, 4);
 
+      // Pick color by leftIndex, fallback to purple if out of range
+      let strokeColor = `${colors[leftIndex % colors.length]}` || "#a78bfa";
+
       return (
         <g key={idx}>
           <line
@@ -326,13 +342,13 @@ export default function YarnBoard() {
             y1={current_y1}
             x2={current_x2}
             y2={current_y2}
-            stroke="purple"
+            stroke={strokeColor}
             strokeWidth={strokeWidth}
             data-connection-index={idx}
             style={{
               outline: isFocused ? '3px solid #6366f1' : 'none',
               cursor: 'pointer',
-              opacity: isHovered || isFocused ? 1 : 0.8
+              opacity: isHovered || isFocused ? 1 : 0.9
             }}
             onMouseEnter={() => setHoveredConnection(idx)}
             onMouseLeave={() => setHoveredConnection(null)}
@@ -372,44 +388,44 @@ export default function YarnBoard() {
   }
 
 
-  return(
+  return (
     <div>
       {mode === 'view' && (
         <div className='overflow-y-auto'>
           <div className="relative p-10 flex justify-center gap-0" onKeyDown={handleKey} ref={parentRef}>
-              <div className={`flex flex-col gap-[14px] h-[${28 + maxLen * 52}px]`}>
-                  <p className='text-center text-xl' style={{"white-space": "nowrap"}}><strong>I am a…</strong></p> 
-                  {/* list title? */}
-                  <ul className={`flex flex-col`}>
-                      {leftLabels.map((_, i) => (
-                          renderItem('left', i)
-                      ))}
-                  </ul>
-              </div>
+            <div className={`flex flex-col gap-[14px] h-[${28 + maxLen * 52}px]`}>
+              <p className='text-center text-xl' style={{ "white-space": "nowrap" }}><strong>I am a…</strong></p>
+              {/* list title? */}
+              <ul className={`flex flex-col`}>
+                {leftLabels.map((_, i) => (
+                  renderItem('left', i)
+                ))}
+              </ul>
+            </div>
 
-              <div className={`flex mt-4 z-0 min-w-[30%]`}>
-                  <svg id="connectionSvg" height={`${maxLen * 52}px`} overflow="visible" viewBox={`0 0 100 ${maxLen * listGapSvg}`} preserveAspectRatio="none" alt=""
-                      className={`z-0 w-full`}>
-                      {renderConnections(groupedConnections)}
-                  </svg>
-                  {renderConnectionTooltip()}
-              </div>
+            <div className={`flex mt-4 z-0 min-w-[30%]`}>
+              <svg id="connectionSvg" height={`${maxLen * 52}px`} overflow="visible" viewBox={`0 0 100 ${maxLen * listGapSvg}`} preserveAspectRatio="none" alt=""
+                className={`z-0 w-full`}>
+                {renderConnections(groupedConnections)}
+              </svg>
+              {renderConnectionTooltip()}
+            </div>
 
-              <div className={`flex flex-col gap-[14px] h-[${28 + maxLen * 52}px]`}>
-                  <p className='text-center text-xl' style={{"white-space": "nowrap"}}><strong>Barriers…</strong></p> 
-                  {/* list title? */}
-                  <ul className={`flex flex-col`}>
-                      {rightLabels.map((_, i) => (
-                          renderItem('right', i)
-                      ))}
-                  </ul>
-              </div>
+            <div className={`flex flex-col gap-[14px] h-[${28 + maxLen * 52}px]`}>
+              <p className='text-center text-xl' style={{ "white-space": "nowrap" }}><strong>Barriers…</strong></p>
+              {/* list title? */}
+              <ul className={`flex flex-col`}>
+                {rightLabels.map((_, i) => (
+                  renderItem('right', i)
+                ))}
+              </ul>
+            </div>
           </div>
 
           <div>
-              <div className='flex justify-center pl-10 pr-10'>
-                  <button onClick={() => toggleMode()} className="bg-purple-600 text-white px-4 py-2 rounded">New Submission</button>
-              </div>
+            <div className='flex justify-center pl-10 pr-10'>
+              <button onClick={() => toggleMode()} className="bg-purple-600 text-white px-4 py-2 rounded">New Submission</button>
+            </div>
           </div>
         </div>
       )}
