@@ -1,6 +1,6 @@
 // import logo from './logo.svg';
 import './App.css';
-import PanelA from './PanelA';
+import PanelA from './panelA/_PanelA';
 
 function App() {
   return (

@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import ChutesLaddersBoard from "./ChutesLaddersBoard";
 import InteractiveCards from "./InteractiveCards";
 
@@ -27,15 +27,17 @@ import InteractiveCards from "./InteractiveCards";
 
 
 export default function ChutesLadders() {
+    const [turnResult, setTurnResult] = useState(null);
+    const edgeLength = 8;  // TODO: set state
+    const turnGeneratorRef = useRef();
 
     const minWidth = 10;
     const maxWidth = 14;
-
     const generateMovers = (edgeLength) => {
         console.log("generating");
         /* Constants **/
         const maxPos = edgeLength ** 2;
-        const maxMovers = Math.floor(maxPos / 4);
+        const maxMovers = Math.floor(maxPos / 4);  // todo: generate sep. insteaD?
         const minMovers = Math.floor(maxPos / 10);
 
         /* Utilities **/
@@ -70,21 +72,35 @@ export default function ChutesLadders() {
         console.log(movers);
         return movers;
     }
+    const movers = useMemo(() => generateMovers(edgeLength), [edgeLength]);
 
-    let currentEdgeLength = 8;
-    let currentMovers = generateMovers(currentEdgeLength);
+    // const handleNextTurn = useCallback(() => {
+    //     if (turnGeneratorRef.current) {
+    //     const result = turnGeneratorRef.current.generateTurn();
+    //     setTurnResult(result);
+    //     }
+    // }, []);
+
+    // useEffect(() => {
+    //     const handleKey = (e) => { if (e.key === "Enter") handleNextTurn(); };
+    //     window.addEventListener("keydown", handleKey);
+    //     return () => window.removeEventListener("keydown", handleKey);
+    // }, [handleNextTurn]);
 
     return (
         // Outer area
         <div className="flex flex-col md:flex-row items-center justify-center bg-gray-100 p-10 gap-8 space-y-0">
             {/* Base board */}
-            <ChutesLaddersBoard edgeLength={currentEdgeLength}
-                chutes={currentMovers.chutes}
-                ladders={currentMovers.ladders}
+            <ChutesLaddersBoard edgeLength={edgeLength}
+                chutes={movers.chutes}
+                ladders={movers.ladders}
             />
 
             {/* Cards */}
-            <InteractiveCards></InteractiveCards>
+            <InteractiveCards ref={turnGeneratorRef}/>
+
+            {/* Status */}
+            {turnResult !== null && <div>Last turn: {turnResult}</div>}
         </div>
     )
 }
