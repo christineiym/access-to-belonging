@@ -1,59 +1,87 @@
+import { useMemo, useState } from "react";
+import ChutesLaddersBoard from "./ChutesLaddersBoard";
 import InteractiveCards from "./InteractiveCards";
 
-const tiles = Array.from({ length: 64 }, (_, i) => i + 1).reverse();
+// let currentMovers = {
+//     "chutes": [],
+//     "ladders": []
+// }
 
-const ladders = [
-  { from: 47, to: 50 },
-  { from: 43, to: 54 },
-  { from: 11, to: 25 },
-  { from: 12, to: 20 },
-  { from: 13, to: 5 },
-];
+// const ladders = [
+//     { from: 47, to: 50 },
+//     { from: 43, to: 54 },
+//     { from: 11, to: 25 },
+//     { from: 12, to: 20 },
+//     { from: 13, to: 5 },
+// ];
+// const slides = [
+//     { from: 45, to: 61 },
+//     { from: 34, to: 18 },
+//     { from: 36, to: 28 },
+//     { from: 30, to: 22 },
+// ];
+// const currentMovers = {
+//     "chutes": slides,
+//     "ladders": ladders
+// }
 
-const slides = [
-  { from: 45, to: 61 },
-  { from: 34, to: 18 },
-  { from: 36, to: 28 },
-  { from: 30, to: 22 },
-];
-
-function isLadder(num) {
-    return ladders.find(l => l.from === num || l.to === num);
-} 
-
-function isSlide(num) {
-    return slides.find(s => s.from === num || s.to === num);
-}
 
 export default function ChutesLadders() {
+
+    const minWidth = 10;
+    const maxWidth = 14;
+
+    const generateMovers = (edgeLength) => {
+        console.log("generating");
+        /* Constants **/
+        const maxPos = edgeLength ** 2;
+        const maxMovers = Math.floor(maxPos / 4);
+        const minMovers = Math.floor(maxPos / 10);
+
+        /* Utilities **/
+        const randInt = (min, max) => Math.floor(Math.random() * (max - min + 1)) + min;
+        // https://stackoverflow.com/questions/12987719/javascript-how-to-randomly-sample-items-without-replacement
+        var positionBucket = [];
+        for (let i = 1; i < maxPos - 1; i++) {  // nothing on start or end
+            positionBucket.push(i + 1);
+        }
+        const getRandomFromBucket = () => {
+            var randomIndex = Math.floor(Math.random() * positionBucket.length);
+            return positionBucket.splice(randomIndex, 1)[0];
+        }
+
+        /* Movers **/
+        const movers = { chutes: [], ladders: [] };
+        const totalMovers = randInt(minMovers, maxMovers);  // Later: Ensure at least one chute and one ladder
+        for (let i = 0; i < totalMovers; i++) {
+            let isChute = Math.random() < 0.5;
+            let from = getRandomFromBucket(1, maxPos);
+            let to = isChute
+                ? randInt(1, from - 1)
+                : randInt(from + 1, maxPos);
+            let width = minWidth + Math.random() * (maxWidth - minWidth);
+
+            let mover = { from, to, width };
+            if (mover) {
+                movers[isChute ? "chutes" : "ladders"].push(mover);
+            }
+        }
+
+        console.log(movers);
+        return movers;
+    }
+
+    let currentEdgeLength = 8;
+    let currentMovers = generateMovers(currentEdgeLength);
+
     return (
         // Outer area
-        <div className="flex flex-col md:flex-row items-center bg-gray-100 p-10 gap-8 space-y-0">
-
+        <div className="flex flex-col md:flex-row items-center justify-center bg-gray-100 p-10 gap-8 space-y-0">
             {/* Base board */}
-            <div className="grid grid-cols-8 border-4 border-black" role="none presentation">
-                {tiles.map((num) => {
-                    const ladder = isLadder(num);
-                    const slide = isSlide(num);
-                    // const isEvenRow = Math.floor((64 - num) / 8) % 2 === 0;
-                    const bg = (num + Math.floor((64 - num) / 8)) % 2 === 0 ? 'bg-tcatTeal' : 'bg-purple-200';
-
-                    return (
-                    <div
-                        key={num}
-                        className={`relative w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 flex items-center justify-center text-black font-bold text-sm sm:text-base ${bg} border border-gray-300`}
-                    >
-                        {num}
-                        {/* {ladder && (
-                        <div className="relative w-1 h-full bg-white rotate-45 border-l-2 border-r-2 border-black" />
-                        )}
-                        {slide && (
-                        <div className="relative w-2 h-full bg-yellow-400 rotate-45 border-l-2 border-r-2 border-black" />
-                        )} */}
-                    </div>
-                    );
-                })}
-            </div>
+            <ChutesLaddersBoard edgeLength={currentEdgeLength}
+                chutes={currentMovers.chutes}
+                ladders={currentMovers.ladders}
+            />
 
             {/* Cards */}
             <InteractiveCards></InteractiveCards>

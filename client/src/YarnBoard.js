@@ -311,13 +311,6 @@ export default function YarnBoard() {
     );
   }
 
-  <li>
-    <button aria-label="Wheelchair User" class="dot items-center gap-2 flex flex-row-reverse">
-      <div aria-hidden="true" class="w-6 h-6 rounded-full border-4 border-gray-400"></div>
-      <span aria-hidden="true">Wheelchair User</span>
-    </button>
-  </li>
-
   const renderConnections = (set) => {
     return set.map((item, idx) => {
       let leftIndex = item.fromDot;
