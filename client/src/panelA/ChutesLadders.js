@@ -3,31 +3,46 @@ import ChutesLaddersBoard from "./ChutesLaddersBoard";
 import InteractiveCards from "./InteractiveCards";
 
 
+// todo: put state variables into session/localStorage
 export default function ChutesLadders() {
     const [mode, setMode] = useState(null);
     const [playerPositions, setPlayerPositions] = useState([
-        { name: "Player 1", position: 63 },
+        { name: "Player 1", position: 64 },
         { name: "Player 2", position: 64 }
     ]);
     const [allPositions, setAllPositions] = useState([]);
     const [lastScenarioDraw, setLastScenarioDraw] = useState(null);
     const [lastPersonaDraw, setLastPersonaDraw] = useState(null);
     const [movers, setMovers] = useState({ chutes: [], ladders: [] });
-    const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
-    const [announcement, setAnnouncement] = useState("");
     const [edgeLength, setEdgeLength] = useState(8);
     const [startCornerLeft, setStartCornerLeft] = useState(true);
     const [startCornerBottom, setStartCornerBottom] = useState(true);
     const [isRows, setIsRows] = useState(true);
-    const [resetKey, setResetKey] = useState(0);
+    const [animationStepIndex, setAnimationStepIndex] = useState(0);
+    const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+    const [announcement, setAnnouncement] = useState("");
+    const [currentPlayerPath, setCurrentPlayerPath] = useState([]);
+
+    const [gameResetKey, setGameResetKey] = useState(0);
+    const [boardResetKey, setBoardResetKey] = useState(1);
+    const [cardResetKey, setCardResetKey] = useState(2);
 
     const handleClear = () => {
         localStorage.clear();
         sessionStorage.clear();
-        setResetKey(k => k + 1); // force remount of subcomponents
+
+        // force remount of component and subcomponents
+        setGameResetKey(k => k + 1);
+        setBoardResetKey(k => k + 1);
+        setCardResetKey(k => k + 1)
     };
 
     const animationRef = useRef(null);
+
+    // Set player positions to start
+    // useEffect(() => {
+
+    // }, [edgeLength, gameResetKey]);
 
     // Generate tile positions (one entry per board cell) in the *numbering order*
     // each entry is { row, col } where row 0 is the top row (SVG coordinate system)
@@ -125,9 +140,9 @@ export default function ChutesLadders() {
         }
         const m = generateMovers(edgeLength);
         setMovers(m);
-    }, [edgeLength]);
+    }, [edgeLength, gameResetKey]);
 
-    const handleCardDraw = (type, result) => {  // TODO: finish
+    const handleCardDraw = (type, result) => {
         console.log("card drawn", type, result);
         if (type === "Scenario") {
             setLastScenarioDraw(result);
@@ -138,19 +153,28 @@ export default function ChutesLadders() {
 
     // Move token on lastScenarioDraw change
     useEffect(() => {
-        console.log(lastScenarioDraw);
+        // console.log(lastScenarioDraw);
         if (lastScenarioDraw == null || !movers) return;
 
         const moveValue = lastScenarioDraw.moveValue ?? Number(lastScenarioDraw); // allow num or object
         const player = playerPositions[currentPlayerIndex];
         const startPos = player.position;
-        const endPos = Math.min(startPos + moveValue, movers.maxPos);
+        const maybePos = startPos + moveValue;  // potential end position
+        const endPos = maybePos >= 1 ? (maybePos <= maxPos ? maybePos : maxPos) : 1;
 
         let path = [];
+
         // Step along the normal move
-        for (let p = startPos + 1; p <= endPos; p++) {
-            path.push(p);
+        if (startPos < endPos) {
+            for (let p = startPos + 1; p <= endPos; p++) {
+                path.push(p);
+            }
+        } else if (startPos > endPos) {
+            for (let p = startPos - 1; p >= endPos; p--) {
+                path.push(p);
+            }
         }
+
         // Check if we land on a mover start
         const moverHit = [
             ...(movers["chutes"] || []),
@@ -162,34 +186,36 @@ export default function ChutesLadders() {
             path.push(moverHit.to);
         }
 
-        movePlayer(path, player.name);
+        console.log("moving ", player.name, " by ", moveValue, ", from ", startPos, " to ", endPos);
+        setCurrentPlayerPath(path);
+        setAnnouncement(path.length > 0 ? `${player.name} moved to tile ${path[path.length - 1]}.` : `${player.name} stayed at tile ${startPos}.`);
+        // Add this to trigger animation:
+        if (path.length > 0) {
+            setAnimationStepIndex(0); // Start animation immediately when path is set
+        }
+    }, [lastScenarioDraw, currentPlayerIndex, movers]);
+    
 
-    }, [lastScenarioDraw, currentPlayerIndex, movers, playerPositions]);
+    // Animation (how to smooth? why did I do it here???)
+    useEffect(() => {
+        // Only run if there is a path to animate
+        if (!currentPlayerPath.length) return;
+        let playerName = playerPositions[currentPlayerIndex]["name"];
+        console.log("in effect", animationStepIndex, currentPlayerPath);
 
-    const movePlayer = (path, playerName) => {
-        if (!path.length) return;
-        let stepIndex = 0;
-
-        const step = () => {
+        // Only run if there is a path left to run
+        if (animationStepIndex < currentPlayerPath.length) {
+            console.log("path left,", currentPlayerPath[animationStepIndex]);
             setPlayerPositions(prevPositions =>
                 prevPositions.map(p =>
                     p.name === playerName
-                        ? { ...p, position: path[stepIndex] }
+                        ? { ...p, position: currentPlayerPath[animationStepIndex] }
                         : p
                 )
             );
-            setAnnouncement(`${playerName} moved to tile ${path[stepIndex]}`);
-
-            stepIndex++;
-            if (stepIndex < path.length) {
-                animationRef.current = setTimeout(step, 400); // adjust speed here
-            } else {
-                clearTimeout(animationRef.current);
-            }
-        };
-
-        step();
-    };
+            setTimeout(() => setAnimationStepIndex(animationStepIndex + 1), 400);  // what does clear timeout do?
+        }
+    }, [animationStepIndex, currentPlayerPath, currentPlayerIndex, playerPositions]);
 
     const testSettings = true;
     return (
@@ -247,7 +273,7 @@ export default function ChutesLadders() {
                 </div>
                 <button type="button"
                     onClick={handleClear}
-                    className="bg-purple-600 text-white px-4 py-2 rounded hover:bg-purple-700 transition"
+                    className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
                 >Reset</button>
             </div>
 
@@ -262,12 +288,13 @@ export default function ChutesLadders() {
                     playerPositions={playerPositions}
                     ladders={movers.ladders}
                     chutes={movers.chutes}
-                    key={resetKey}
+                    key={boardResetKey}
+                    ref={animationRef}
                 />
 
                 {/* Cards */}
                 <InteractiveCards onCardDraw={handleCardDraw}
-                    key={resetKey}
+                    key={cardResetKey}
                 />
             </div>
         </div>

@@ -1,3 +1,5 @@
+// how to only rerender moving players?
+
 export default function ChutesLaddersBoard({ edgeLength, startCornerLeft, startCornerBottom, isRows, allPositions, playerPositions, ladders, chutes }) {
   const maxPos = edgeLength ** 2;
 
@@ -5,7 +7,6 @@ export default function ChutesLaddersBoard({ edgeLength, startCornerLeft, startC
   const tileSize = 70; // px per tile
   const svgSize = edgeLength * tileSize;
 
-  // TODO: fix
   const getTileCoords = (pos) => {
     // Convert 1-based position to board coordinates based on settings
     let row, col;
@@ -127,6 +128,7 @@ export default function ChutesLaddersBoard({ edgeLength, startCornerLeft, startC
           {/* Player tokens */}
           {playerPositions.map((player, idx) => {
             const { x, y } = getTileCoords(player.position);
+            console.log("place ", player.name, " at ", player.position, ", at ", x, ", ", y);
             return (
               <circle
                 key={player.name}
