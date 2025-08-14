@@ -128,16 +128,32 @@ export default function ChutesLaddersBoard({ edgeLength, startCornerLeft, startC
           {/* Player tokens */}
           {playerPositions.map((player, idx) => {
             const { x, y } = getTileCoords(player.position);
-            console.log("place ", player.name, " at ", player.position, ", at ", x, ", ", y);
+            // console.log("place ", player.name, " at ", player.position, ", at ", x, ", ", y);
+            const xDif = idx % 2 === 0 ? 4 : (4/3);
+            const yDif = idx < 2 ? 4 : (4/3);
+
             return (
-              <circle
-                key={player.name}
-                cx={x + tileSize / 2}
-                cy={y + tileSize / 2}
-                r={tileSize / 6}
-                fill={["red", "blue", "green", "purple"][idx % 4]}
-                stroke="#000"
-              />
+              <g>
+                <circle
+                  key={player.name}
+                  cx={x + tileSize / xDif}
+                  cy={y + tileSize / yDif}
+                  r={tileSize / 6}
+                  fill={["red", "blue", "green", "purple"][idx % 4]}
+                  stroke="#000"
+                />
+                <text
+                  x={x + tileSize / xDif}
+                  y={y + tileSize / yDif}
+                  fill="white"
+                  fontSize={Math.max(8, Math.floor(tileSize / 4))}
+                  fontFamily="Arial, Helvetica, sans-serif"
+                  textAnchor="middle"
+                  alignmentBaseline="central"
+                >
+                  {idx + 1}
+                </text>
+              </g>
             );
           })}
 

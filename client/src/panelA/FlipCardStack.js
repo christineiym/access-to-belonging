@@ -38,7 +38,7 @@ export default function FlipCardStack({ type, allCards, onDraw }) {
     const card = remaining[0];
     const newRemaining = remaining.slice(1);
     setAnimatingCard(card);
-    setAnnouncement(`Drew ${type} card: ${card.title}`);
+    setAnnouncement(`${type}: ${card.title}. ${card.description}. ${card.moveValue ? `Move ${card.moveValue}`: ""}`);
 
     // animation
     setTimeout(() => {
@@ -129,7 +129,8 @@ export default function FlipCardStack({ type, allCards, onDraw }) {
                 style={{ top: `${i * 1.5}px`, left: `${i * 1.5}px`, zIndex: -i }}
               >
                 <p className="font-bold text-center">{card.title}</p>
-                <p className="text-center mt-1">{card.description}</p>
+                <p className="text-center mt-1 text-[14px]">{card.description}</p>
+                {card.moveValue && <p className="font-bold italic text-center mt-1">{`Move ${card.moveValue}`}</p>}
               </div>
             ))}
 

@@ -3,13 +3,17 @@ import ChutesLaddersBoard from "./ChutesLaddersBoard";
 import InteractiveCards from "./InteractiveCards";
 
 
+const playersAtStart = [
+        { name: "Player 1", position: 1 },
+        { name: "Player 2", position: 1 },
+        { name: "Player 3", position: 1 },
+        { name: "Player 4", position: 1 }
+    ]
+
 // todo: put state variables into session/localStorage
 export default function ChutesLadders() {
     const [mode, setMode] = useState(null);
-    const [playerPositions, setPlayerPositions] = useState([
-        { name: "Player 1", position: 64 },
-        { name: "Player 2", position: 64 }
-    ]);
+    const [playerPositions, setPlayerPositions] = useState(playersAtStart);
     const [allPositions, setAllPositions] = useState([]);
     const [lastScenarioDraw, setLastScenarioDraw] = useState(null);
     const [lastPersonaDraw, setLastPersonaDraw] = useState(null);
@@ -19,30 +23,59 @@ export default function ChutesLadders() {
     const [startCornerBottom, setStartCornerBottom] = useState(true);
     const [isRows, setIsRows] = useState(true);
     const [animationStepIndex, setAnimationStepIndex] = useState(0);
-    const [currentPlayerIndex, setCurrentPlayerIndex] = useState(0);
+    const [currentPlayerIndex, setCurrentPlayerIndex] = useState(-1);
     const [announcement, setAnnouncement] = useState("");
     const [currentPlayerPath, setCurrentPlayerPath] = useState([]);
+    const [turnInProgress, setTurnInProgress] = useState(false);
 
-    const [gameResetKey, setGameResetKey] = useState(0);
-    const [boardResetKey, setBoardResetKey] = useState(1);
-    const [cardResetKey, setCardResetKey] = useState(2);
+    const [boardResetKey, setBoardResetKey] = useState(0);
+    const [cardResetKey, setCardResetKey] = useState(1);
 
     const handleClear = () => {
         localStorage.clear();
         sessionStorage.clear();
 
-        // force remount of component and subcomponents
-        setGameResetKey(k => k + 1);
-        setBoardResetKey(k => k + 1);
-        setCardResetKey(k => k + 1)
-    };
+        // reset state to default
+        setPlayerPositions(playersAtStart);
+        setLastScenarioDraw(null);
+        setLastPersonaDraw(null);
+        setAnimationStepIndex(0);
+        setCurrentPlayerIndex(0);
+        setAnnouncement("");
+        setCurrentPlayerPath([]);
+        setTurnInProgress(false);
 
+        // display settings
+        setEdgeLength(8);
+        setStartCornerLeft(true);
+        setStartCornerBottom(true);
+        setIsRows(true);
+
+        // force remount of subcomponents
+        setBoardResetKey(k => k + 1);
+        setCardResetKey(k => k + 1);
+    };
     const animationRef = useRef(null);
 
-    // Set player positions to start
-    // useEffect(() => {
+    // tweaking edge length also resets the board
+    useEffect(() => {
+        localStorage.clear();
+        sessionStorage.clear();
 
-    // }, [edgeLength, gameResetKey]);
+        // reset state to default
+        setPlayerPositions(playersAtStart);
+        setLastScenarioDraw(null);
+        setLastPersonaDraw(null);
+        setAnimationStepIndex(0);
+        setCurrentPlayerIndex(0);
+        setAnnouncement("");
+        setCurrentPlayerPath([]);
+        setTurnInProgress(false);
+
+        // force remount of subcomponents
+        setBoardResetKey(k => k + 1);
+        setCardResetKey(k => k + 1);
+    }, [edgeLength]);
 
     // Generate tile positions (one entry per board cell) in the *numbering order*
     // each entry is { row, col } where row 0 is the top row (SVG coordinate system)
@@ -140,10 +173,10 @@ export default function ChutesLadders() {
         }
         const m = generateMovers(edgeLength);
         setMovers(m);
-    }, [edgeLength, gameResetKey]);
+    }, [edgeLength, boardResetKey]);
 
     const handleCardDraw = (type, result) => {
-        console.log("card drawn", type, result);
+        // console.log("card drawn", type, result);
         if (type === "Scenario") {
             setLastScenarioDraw(result);
         } else {
@@ -153,11 +186,13 @@ export default function ChutesLadders() {
 
     // Move token on lastScenarioDraw change
     useEffect(() => {
-        // console.log(lastScenarioDraw);
         if (lastScenarioDraw == null || !movers) return;
+        if (currentPlayerIndex === -1) {
+            setCurrentPlayerIndex(0);
+        }
 
         const moveValue = lastScenarioDraw.moveValue ?? Number(lastScenarioDraw); // allow num or object
-        const player = playerPositions[currentPlayerIndex];
+        const player = playerPositions[currentPlayerIndex >= 0 ? currentPlayerIndex: 1];
         const startPos = player.position;
         const maybePos = startPos + moveValue;  // potential end position
         const endPos = maybePos >= 1 ? (maybePos <= maxPos ? maybePos : maxPos) : 1;
@@ -186,36 +221,47 @@ export default function ChutesLadders() {
             path.push(moverHit.to);
         }
 
-        console.log("moving ", player.name, " by ", moveValue, ", from ", startPos, " to ", endPos);
+        // console.log("moving ", player.name, " by ", moveValue, ", from ", startPos, " to ", endPos);
+        setAnnouncement(path.length > 0 ? `${player.name} moved to tile ${path[path.length - 1]}.` : `${player.name} stayed at tile ${endPos}.`);
+
+        // Animate if necessary
         setCurrentPlayerPath(path);
-        setAnnouncement(path.length > 0 ? `${player.name} moved to tile ${path[path.length - 1]}.` : `${player.name} stayed at tile ${startPos}.`);
-        // Add this to trigger animation:
-        if (path.length > 0) {
-            setAnimationStepIndex(0); // Start animation immediately when path is set
-        }
-    }, [lastScenarioDraw, currentPlayerIndex, movers]);
-    
+        setAnimationStepIndex(0); // Trigger animation when path is set
+        setTurnInProgress(true);
+    }, [lastScenarioDraw, movers]);
+
 
     // Animation (how to smooth? why did I do it here???)
     useEffect(() => {
-        // Only run if there is a path to animate
-        if (!currentPlayerPath.length) return;
-        let playerName = playerPositions[currentPlayerIndex]["name"];
-        console.log("in effect", animationStepIndex, currentPlayerPath);
+        if (turnInProgress) {
+            // Path exists to animate
+            let playerName = playerPositions[currentPlayerIndex]["name"];
 
-        // Only run if there is a path left to run
-        if (animationStepIndex < currentPlayerPath.length) {
-            console.log("path left,", currentPlayerPath[animationStepIndex]);
-            setPlayerPositions(prevPositions =>
-                prevPositions.map(p =>
-                    p.name === playerName
-                        ? { ...p, position: currentPlayerPath[animationStepIndex] }
-                        : p
-                )
-            );
-            setTimeout(() => setAnimationStepIndex(animationStepIndex + 1), 400);  // what does clear timeout do?
+            // Only run if there is a path left to run; reset path upon completion
+            if (animationStepIndex < currentPlayerPath.length) {
+                setPlayerPositions(prevPositions =>
+                    prevPositions.map(p =>
+                        p.name === playerName
+                            ? { ...p, position: currentPlayerPath[animationStepIndex] }
+                            : p
+                    )
+                );
+                setTimeout(() => setAnimationStepIndex(animationStepIndex + 1), 400);  // what does clear timeout do?
+            } else {
+                // Animation complete; advance player
+                setTurnInProgress(false);
+            }
         }
-    }, [animationStepIndex, currentPlayerPath, currentPlayerIndex, playerPositions]);
+    }, [animationStepIndex, turnInProgress]);
+
+    // Advance turn
+    useEffect(() => {
+        // console.log("advancing effect", currentPlayerPath, turnInProgress, currentPlayerIndex);
+        if (!turnInProgress) {  // eventually
+            // console.log(currentPlayerIndex + 1, " actually advances");
+            setCurrentPlayerIndex((currentPlayerIndex + 1) % playerPositions.length);
+        }
+    }, [turnInProgress, playerPositions.length]);
 
     const testSettings = true;
     return (
@@ -225,18 +271,6 @@ export default function ChutesLadders() {
                 {/* Controls to tweak the state (convenience for testing) */}
                 {testSettings && (
                     <div className="mb-4 flex flex-wrap gap-4 items-center">
-                        <label className="flex items-center gap-2">
-                            <span>Edge length</span>
-                            <input
-                                type="number"
-                                min={2}
-                                max={20}
-                                value={edgeLength}
-                                onChange={(e) => setEdgeLength(Math.max(2, Number(e.target.value) || 2))}
-                                className="ml-2 w-20 p-1 border rounded"
-                            />
-                        </label>
-
                         <label className="flex items-center gap-2">
                             <input
                                 type="checkbox"
@@ -263,18 +297,32 @@ export default function ChutesLadders() {
                             />
                             <span>Number by rows (zigzag horizontally)</span>
                         </label>
+
+                        <label className="flex items-center gap-2">
+                            <input
+                                type="number"
+                                min={2}
+                                max={20}
+                                value={edgeLength}
+                                onChange={(e) => setEdgeLength(Math.max(2, Number(e.target.value) || 2))}
+                                className="ml-2 w-20 p-1 border rounded"
+                            />
+                            <span>Edge length<br></br>(changing resets the game)</span>
+                        </label>
+
                     </div>
                 )}
 
-                {/* Status */}
-                {announcement !== null && <div><strong>Last turn: </strong>{announcement}</div>}
-                <div aria-live="polite" className="sr-only">
-                    {announcement}
-                </div>
                 <button type="button"
                     onClick={handleClear}
                     className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-700 transition"
                 >Reset</button>
+
+                {/* Status */}
+                {announcement !== null && <div><strong>Last turn: </strong>{announcement === "" ? "Pick a card to start!" : announcement}</div>}
+                <div aria-live="polite" className="sr-only">
+                    {announcement === "" ? "Pick a card to start!" : announcement}
+                </div>
             </div>
 
 
