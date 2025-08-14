@@ -10,7 +10,7 @@ const getStorage = () => {
   }
 };
 
-export default function FlipCardStack({ type, allCards }) {
+export default function FlipCardStack({ type, allCards, onDraw }) {
   const storage = getStorage();
   const storageKey = `${type.toLowerCase()}Deck`;
 
@@ -40,12 +40,16 @@ export default function FlipCardStack({ type, allCards }) {
     setAnimatingCard(card);
     setAnnouncement(`Drew ${type} card: ${card.title}`);
 
+    // animation
     setTimeout(() => {
       const newDrawn = [card, ...drawn];
       setRemaining(newRemaining);
       setDrawn(newDrawn);
       setAnimatingCard(null);
       storage.setItem(storageKey, JSON.stringify({ remaining: newRemaining, drawn: newDrawn }));
+
+      // where's the best place to put this? (in terms of timing)
+      onDraw(type, card);  // Pass result upward
     }, 500);
   };
 

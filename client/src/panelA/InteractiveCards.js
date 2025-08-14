@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
 import FlipCardStack from "./FlipCardStack";
-import CardTurnGenerator from "./CardTurnGenerator";
 
-export default function InteractiveCardDeck() {
+export default function InteractiveCardDeck({ onCardDraw }) {
   const [data, setData] = useState(null);
   const [turnGenerator, setTurnGenerator] = useState(null);
 
@@ -24,10 +23,23 @@ export default function InteractiveCardDeck() {
 
   if (!data) return <div className="p-10">Loading cards...</div>;  // vs. try again later?
 
+  const bubbleUpResult = (type, result) => {
+    if (onCardDraw) {
+      onCardDraw(type, result); // Bubble up to Game
+    }
+  }  // should probably memo-ize
+
+
   return (
     <div className="flex flex-col gap-10">
-        <FlipCardStack type="Scenario" allCards={data.scenarioCards} />
-        <FlipCardStack type="Persona" allCards={data.personaCards} />
+        <FlipCardStack type="Scenario"
+          allCards={data.scenarioCards}
+          onDraw={bubbleUpResult}
+        />
+        <FlipCardStack type="Persona"
+          allCards={data.personaCards}
+          onDraw={bubbleUpResult}
+        />
     </div>
   );
 }

@@ -1,114 +1,60 @@
-import { useMemo, useState } from "react";
-
-
-export default function ChutesLaddersBoard({edgeLength, ladders, chutes}) {
-  const [startCornerLeft, setStartCornerLeft] = useState(true);
-  const [startCornerBottom, setStartCornerBottom] = useState(true);
-  const [isRows, setIsRows] = useState(true);
+export default function ChutesLaddersBoard({ edgeLength, startCornerLeft, startCornerBottom, isRows, allPositions, playerPositions, ladders, chutes }) {
+  const maxPos = edgeLength ** 2;
 
   // sizing
   const tileSize = 70; // px per tile
   const svgSize = edgeLength * tileSize;
 
-  // generate tile positions (one entry per board cell) in the *numbering order*
-  // each entry is { row, col } where row 0 is the top row (SVG coordinate system)
-  const positions = useMemo(() => {
-    const N = Math.max(1, Math.floor(edgeLength));
-    const pos = [];
+  // TODO: fix
+  const getTileCoords = (pos) => {
+    // Convert 1-based position to board coordinates based on settings
+    let row, col;
 
-    if (isRows) {
-      // Zigzag across rows (horizontal zigzag), then move vertically between rows
-      // Determine list of row indices in the order we visit them.
-      const startRow = startCornerBottom ? N - 1 : 0;
-      const rowStep = startCornerBottom ? -1 : 1;
-      const rowIndices = [];
-      for (let i = 0, r = startRow; i < N; i++, r += rowStep) rowIndices.push(r);
-
-      for (let j = 0; j < N; j++) {
-        const row = rowIndices[j];
-        const forwardCols = Array.from({ length: N }, (_, k) => k);
-        const backwardCols = Array.from({ length: N }, (_, k) => N - 1 - k);
-        // For the first visited row we start from the left or right depending on startCornerLeft.
-        // Then alternate direction on each subsequent row to create the zigzag.
-        const cols = j % 2 === 0
-          ? (startCornerLeft ? forwardCols : backwardCols)
-          : (startCornerLeft ? backwardCols : forwardCols);
-
-        for (const col of cols) pos.push({ row, col });
+    if (isRows) {  // zigzag horizontally
+      row = Math.floor((pos - 1) / edgeLength);
+      col = (pos - 1) % edgeLength;
+      if ((startCornerBottom && row % 2 === 1) || (!startCornerBottom && row % 2 === 0)) {
+        col = edgeLength - 1 - col;  // zagging back
       }
-    } else {
-      // Zigzag across columns (vertical zigzag), then move horizontally between columns
-      const startCol = startCornerLeft ? 0 : N - 1;
-      const colStep = startCornerLeft ? 1 : -1;
-      const colIndices = [];
-      for (let i = 0, c = startCol; i < N; i++, c += colStep) colIndices.push(c);
-
-      for (let j = 0; j < N; j++) {
-        const col = colIndices[j];
-        const forwardRows = Array.from({ length: N }, (_, k) => k);
-        const backwardRows = Array.from({ length: N }, (_, k) => N - 1 - k);
-        // For the first visited column we start top->bottom or bottom->top depending on startCornerBottom.
-        // Then alternate direction on each subsequent column to create the vertical zigzag.
-        const rows = j % 2 === 0
-          ? (startCornerBottom ? backwardRows : forwardRows)
-          : (startCornerBottom ? forwardRows : backwardRows);
-
-        for (const row of rows) pos.push({ row, col });
+      if (!startCornerBottom) {
+        row = edgeLength - 1 - row;
+        if (startCornerLeft) {
+          col = edgeLength - 1 - col;
+        }
+      }
+      if (!startCornerLeft) {
+        col = edgeLength - 1 - col;
+      }
+    } else {  // zigzag vertically
+      col = Math.floor((pos - 1) / edgeLength);
+      row = (pos - 1) % edgeLength;
+      if ((startCornerLeft && col % 2 === 1) || (!startCornerLeft && col % 2 === 0)) {
+        row = edgeLength - 1 - row;  // zagging back
+      }
+      if (!startCornerLeft) {
+        col = edgeLength - 1 - col;
+        if (startCornerBottom) {
+          row = edgeLength - 1 - row;
+        }
+      }
+      if (!startCornerBottom) {
+        row = edgeLength - 1 - row;
       }
     }
 
-    return pos;
-  }, [edgeLength, startCornerLeft, startCornerBottom, isRows]);
+    let x = col * tileSize;
+    let y = (edgeLength * tileSize) - (row + 1) * tileSize;
+    return { x, y };
+  }
 
   const tileCenter = (posIndex) => {
-    const { row, col } = positions[posIndex - 1];
+    const { row, col } = allPositions[posIndex - 1];
     return [col * tileSize + tileSize * 0.5, row * tileSize + tileSize * 0.5];
   };
 
+
   return (
     <div className="p-4">
-      {/* Controls to tweak the state (convenience for testing) */}
-      {/* <div className="mb-4 flex flex-wrap gap-4 items-center">
-        <label className="flex items-center gap-2">
-          <span>Edge length</span>
-          <input
-            type="number"
-            min={2}
-            max={20}
-            value={edgeLength}
-            onChange={(e) => setEdgeLength(Math.max(2, Number(e.target.value) || 2))}
-            className="ml-2 w-20 p-1 border rounded"
-          />
-        </label>
-
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={startCornerLeft}
-            onChange={(e) => setStartCornerLeft(e.target.checked)}
-          />
-          <span>Start corner left</span>
-        </label>
-
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={startCornerBottom}
-            onChange={(e) => setStartCornerBottom(e.target.checked)}
-          />
-          <span>Start corner bottom</span>
-        </label>
-
-        <label className="flex items-center gap-2">
-          <input
-            type="checkbox"
-            checked={isRows}
-            onChange={(e) => setIsRows(e.target.checked)}
-          />
-          <span>Number by rows (zigzag horizontally)</span>
-        </label>
-      </div> */}
-
       <div className="inline-block border-black">
         <svg
           width={svgSize}
@@ -121,7 +67,7 @@ export default function ChutesLaddersBoard({edgeLength, ladders, chutes}) {
           <rect x={0} y={0} width={svgSize} height={svgSize} fill="none" stroke="#000" strokeWidth={3} />
 
           {/* tiles */}
-          {positions.map((p, idx) => {
+          {allPositions.map((p, idx) => {
             const x = p.col * tileSize;
             const y = p.row * tileSize;
             const isLight = (p.row + p.col) % 2 === 0;
@@ -150,15 +96,15 @@ export default function ChutesLaddersBoard({edgeLength, ladders, chutes}) {
             );
           })}
 
+          {/* Chutes and Ladders */}
           {chutes.map((chute, i) => {
             const [x1, y1] = tileCenter(chute.from);
             const [x2, y2] = tileCenter(chute.to);
-            const w = chute.width; 
+            const w = chute.width;
             return (
               <line key={`chute-${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#chutePattern)" strokeWidth={w} strokeLinecap="square" />
             );
           })}
-
           {ladders.map((ladder, i) => {
             const [x1, y1] = tileCenter(ladder.from);
             const [x2, y2] = tileCenter(ladder.to);
@@ -167,7 +113,6 @@ export default function ChutesLaddersBoard({edgeLength, ladders, chutes}) {
               <line key={`ladder-${i}`} x1={x1} y1={y1} x2={x2} y2={y2} stroke="url(#ladderPattern)" strokeWidth={w} strokeLinecap="square" />
             );
           })}
-
           <defs>
             <pattern id="chutePattern" width="8" height="8" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
               <rect width="4" height="8" fill="yellow" />
@@ -178,6 +123,21 @@ export default function ChutesLaddersBoard({edgeLength, ladders, chutes}) {
               <rect x="4" width="4" height="8" fill="none" />
             </pattern>
           </defs>
+
+          {/* Player tokens */}
+          {playerPositions.map((player, idx) => {
+            const { x, y } = getTileCoords(player.position);
+            return (
+              <circle
+                key={player.name}
+                cx={x + tileSize / 2}
+                cy={y + tileSize / 2}
+                r={tileSize / 6}
+                fill={["red", "blue", "green", "purple"][idx % 4]}
+                stroke="#000"
+              />
+            );
+          })}
 
         </svg>
       </div>
