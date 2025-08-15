@@ -30,6 +30,13 @@ export default function PanelB() {
         <p className="text-2xl font-semibold mt-2">Feedback about Access to Belonging</p>
       </div>
 
+  {/* Teal Circle with Text */}
+  <div className="absolute left-4 w-80 h-80 bg-purple-200 text-black rounded-full flex items-center justify-center p-6 shadow-lg">
+    <p className="font-medium">
+  <strong>Add your story--join us today!</strong> <a href="https://tcat.cs.washington.edu/sdf25/">https://tcat.cs.washington.edu/sdf25/</a>
+    </p>
+  </div>
+
       <Story name={"Amy"} 
         location={"North Bend, WA"} 
         summary={<>Amy usually drives, but after an injury she primarily used <strong>public transportation</strong> for several months.</>}

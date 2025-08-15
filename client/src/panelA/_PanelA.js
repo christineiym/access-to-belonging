@@ -31,6 +31,13 @@ export default function PanelA() {
         {/* <h2 className="text-5xl mt-2 font-semibold">To Belonging</h2> */}
       </div>
 
+        {/* Teal Circle with Text */}
+        <div className="absolute left-4 w-80 h-80 bg-purple-200 text-black rounded-full flex items-center justify-center p-6 shadow-lg">
+          <p className="text-lg md:text-2xl font-medium">
+            Try <strong>AccessMap</strong>, our sidewalk preferences-aware route planner at http://accessmap.app! 
+          </p>
+        </div>
+
       {/* Teal Circle with Text */}
       <div className="absolute right-4 w-80 h-80 bg-tcatTeal text-black rounded-full flex items-center justify-center p-6 shadow-lg">
         <p className="font-medium">

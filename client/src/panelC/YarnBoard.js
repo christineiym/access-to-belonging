@@ -54,7 +54,7 @@ export default function YarnBoard() {
 
   // Fetch leftLabels (personas) and rightLabels (barriers) from backend
   useEffect(() => {
-    axios.get('http://localhost:3001/persona?displayOnly=1')
+    axios.get('http://20.64.169.121:3001/persona?displayOnly=1')
       .then(res => {
         if (Array.isArray(res.data) && res.data.length > 0) {
           setLeftLabels(res.data.map(p => p.text));
@@ -64,7 +64,7 @@ export default function YarnBoard() {
         // fallback to demo data if backend fails
         setLeftLabels(['Wheelchair User', 'Cyclist', 'Avid Walker', 'Parent with a stroller', 'Transit Rider', 'White-Cane User']);
       });
-    axios.get('http://localhost:3001/barrier?displayOnly=1')
+    axios.get('http://20.64.169.121:3001/barrier?displayOnly=1')
       .then(res => {
         if (Array.isArray(res.data) && res.data.length > 0) {
           setRightLabels(res.data.map(b => b.text));
@@ -82,7 +82,7 @@ export default function YarnBoard() {
 
   // Fetch connections with displayOnly=1
   useEffect(() => {
-    axios.get('http://localhost:3001/connection?displayOnly=1')
+    axios.get('http://20.64.169.121:3001/connection?displayOnly=1')
       .then(res => {
         setGroupedConnections(aggregateConnections(res.data));
         // console.log(res.data);
@@ -293,7 +293,7 @@ export default function YarnBoard() {
     try {
       await Promise.all(
         formData.checkboxes.map(async (barrierText) => {
-          await axios.post('http://localhost:3001/connection', {
+          await axios.post('http://20.64.169.121:3001/connection', {
             barrier_text: barrierText,
             persona_text: formData.dropdown,
             time: Date.now()

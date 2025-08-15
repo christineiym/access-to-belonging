@@ -6,7 +6,7 @@ export default function InteractiveCardDeck({ onCardDraw }) {
   const [turnGenerator, setTurnGenerator] = useState(null);
 
   useEffect(() => {
-    fetch("./cards.json")
+    fetch("/access-to-belonging/cards.json")
       .then((res) => res.json())
       .then((json) => {
         setData(json);
