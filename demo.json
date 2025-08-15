@@ -1,94 +1,82 @@
 [
     {
-        "fromDot": 1,
-        "toDot": 1
+        "id": 2,
+        "barrier_id": 2,
+        "persona_id": 1,
+        "time": 1755222208625,
+        "fromDot": "Wheelchair User",
+        "toDot": "Large cracks"
     },
     {
-        "fromDot": 1,
-        "toDot": 1
+        "id": 1,
+        "barrier_id": 3,
+        "persona_id": 1,
+        "time": 1755222208627,
+        "fromDot": "Wheelchair User",
+        "toDot": "No curb ramps"
     },
     {
-        "fromDot": 1,
-        "toDot": 1
+        "id": 6,
+        "barrier_id": 3,
+        "persona_id": 1,
+        "time": 1755222890197,
+        "fromDot": "Wheelchair User",
+        "toDot": "No curb ramps"
     },
     {
-        "fromDot": 1,
-        "toDot": 1
+        "id": 3,
+        "barrier_id": 4,
+        "persona_id": 1,
+        "time": 1755222208628,
+        "fromDot": "Wheelchair User",
+        "toDot": "Steep inclines"
     },
     {
-        "fromDot": 1,
-        "toDot": 1
+        "id": 7,
+        "barrier_id": 4,
+        "persona_id": 1,
+        "time": 1755222890198,
+        "fromDot": "Wheelchair User",
+        "toDot": "Steep inclines"
     },
     {
-        "fromDot": 0,
-        "toDot": 1
+        "id": 18,
+        "barrier_id": 1,
+        "persona_id": 3,
+        "time": 1755222974625,
+        "fromDot": "Avid Walker",
+        "toDot": "Lack of lighting"
     },
     {
-        "fromDot": 0,
-        "toDot": 0
+        "id": 16,
+        "barrier_id": 5,
+        "persona_id": 3,
+        "time": 1755222974623,
+        "fromDot": "Avid Walker",
+        "toDot": "Confusing wayfinding"
     },
     {
-        "fromDot": 2,
-        "toDot": 0
+        "id": 9,
+        "barrier_id": 3,
+        "persona_id": 4,
+        "time": 1755222902976,
+        "fromDot": "Parent with a stroller",
+        "toDot": "No curb ramps"
     },
     {
-        "fromDot": 2,
-        "toDot": 2
+        "id": 11,
+        "barrier_id": 6,
+        "persona_id": 6,
+        "time": 1755222915572,
+        "fromDot": "White-Cane User",
+        "toDot": "No tactile-paving"
     },
     {
-        "fromDot": 0,
-        "toDot": 0
-    },
-    {
-        "fromDot": 0,
-        "toDot": 0
-    },
-    {
-        "fromDot": 1,
-        "toDot": 0
-    },
-    {
-        "fromDot": 1,
-        "toDot": 1
-    },
-    {
-        "fromDot": 4,
-        "toDot": 4
-    },
-    {
-        "fromDot": 4,
-        "toDot": 4
-    },
-    {
-        "fromDot": 4,
-        "toDot": 1
-    },
-    {
-        "fromDot": 4,
-        "toDot": 4
-    },
-    {
-        "fromDot": 0,
-        "toDot": 0
-    },
-    {
-        "fromDot": 1,
-        "toDot": 1
-    },
-    {
-        "fromDot": 4,
-        "toDot": 2
-    },
-    {
-        "fromDot": 4,
-        "toDot": 0
-    },
-    {
-        "fromDot": 2,
-        "toDot": 1
-    },
-    {
-        "fromDot": 2,
-        "toDot": 2
+        "id": 10,
+        "barrier_id": 7,
+        "persona_id": 6,
+        "time": 1755222915570,
+        "fromDot": "White-Cane User",
+        "toDot": "No audible pedestrian signal"
     }
 ]
