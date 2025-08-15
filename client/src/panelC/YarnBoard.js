@@ -90,7 +90,7 @@ export default function YarnBoard() {
       .catch(() => {
         console.log("in catch");
         // fallback to demo data if backend fails
-        fetch("./demo.json")
+        fetch("/access-to-belonging/demo.json")
           .then((res) => res.json())
           .then((json) => setGroupedConnections(aggregateConnections(json)));
       });
@@ -194,7 +194,7 @@ export default function YarnBoard() {
         actuallyFocusItem({ side: 'left', index: (focus.index - 1 + leftCount) % leftCount });
       } else if (e.key === 'ArrowRight' && connCount > 0) {
         // Find a connection that starts at this left dot
-        const idx = groupedConnections.findIndex(c => c.fromDot === focus.index);
+        const idx = groupedConnections.findIndex(c => (c.persona_id - 1) === focus.index);
         if (idx !== -1) {
           actuallyFocusConnection({ connectionIndex: idx });
         } else {
@@ -216,7 +216,7 @@ export default function YarnBoard() {
         actuallyFocusItem({ side: 'right', index: (focus.index - 1 + rightCount) % rightCount });
       } else if (e.key === 'ArrowLeft' && connCount > 0) {
         // Find a connection that ends at this right dot
-        const idx = groupedConnections.findIndex(c => c.toDot === focus.index);
+        const idx = groupedConnections.findIndex(c => (c.barrier_id - 1) === focus.index);
         if (idx !== -1) {
           actuallyFocusConnection({ connectionIndex: idx });
         } else {
@@ -237,9 +237,9 @@ export default function YarnBoard() {
       }
     } else if (isConnection) {
       if (e.key === 'ArrowLeft') {
-        actuallyFocusItem({ side: 'left', index: groupedConnections[focus.connectionIndex]?.fromDot ?? 0 });
+        actuallyFocusItem({ side: 'left', index: (groupedConnections[focus.connectionIndex]?.persona_id - 1) ?? 0 });
       } else if (e.key === 'ArrowRight') {
-        actuallyFocusItem({ side: 'right', index: groupedConnections[focus.connectionIndex]?.toDot ?? 0 });
+        actuallyFocusItem({ side: 'right', index: (groupedConnections[focus.connectionIndex]?.barrier_id - 1) ?? 0 });
       } else if (e.key === 'ArrowDown' && connCount > 0) {
         const next = (focus.connectionIndex + 1) % connCount;
         actuallyFocusConnection({ connectionIndex: next });

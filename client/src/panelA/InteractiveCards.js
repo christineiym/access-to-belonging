@@ -3,21 +3,12 @@ import FlipCardStack from "./FlipCardStack";
 
 export default function InteractiveCardDeck({ onCardDraw }) {
   const [data, setData] = useState(null);
-  const [turnGenerator, setTurnGenerator] = useState(null);
 
   useEffect(() => {
     fetch("/access-to-belonging/cards.json")
       .then((res) => res.json())
       .then((json) => {
         setData(json);
-        // const currentCardTurnGenerator = new CardTurnGenerator({
-        //   validTurnValues: json,
-        //   minMove: -1,
-        //   maxMove: -1,
-        //   drawWithoutReplacement: true,
-        //   reuseDeck: true,
-        // });
-        // setTurnGenerator(currentCardTurnGenerator);
       });
   }, []);
 

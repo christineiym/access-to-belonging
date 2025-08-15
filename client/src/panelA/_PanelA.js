@@ -31,22 +31,30 @@ export default function PanelA() {
         {/* <h2 className="text-5xl mt-2 font-semibold">To Belonging</h2> */}
       </div>
 
-        {/* Teal Circle with Text */}
-        <div className="absolute left-4 w-80 h-80 bg-purple-200 text-black rounded-full flex items-center justify-center p-6 shadow-lg">
-          <p className="text-lg md:text-2xl font-medium">
-            Try <strong>AccessMap</strong>, our sidewalk preferences-aware route planner at http://accessmap.app! 
+      {/* Info bubbles 
+        absolute left-4 
+        absolute right-4 
+      */}
+      <div className="flex flex-col md:flex-row gap-10 p-10 justify-between">
+        {/* AccessMap Link */}
+        <div className="flex w-80 h-80 bg-purple-200 text-black rounded-full flex items-center p-6 shadow-lg">
+          <p className="text-2xl font-medium">
+            Try <a className="font-bold text-blue-700 hover:text-blue-600 decoration-2 hover:underline focus:outline-hidden focus:underline" 
+                    href="http://accessmap.app">AccessMap</a>, our sidewalk preferences-aware route planner! 
           </p>
         </div>
 
-      {/* Teal Circle with Text */}
-      <div className="absolute right-4 w-80 h-80 bg-tcatTeal text-black rounded-full flex items-center justify-center p-6 shadow-lg">
-        <p className="font-medium">
-          Read these real stories from the groundbreaking report <strong>Transportation Access for Everyone: Washington State</strong> by the Disability Mobility Initiative and Disability Rights Washington.
-        </p>
+        {/* Cards are stories (how to make clear?) */}
+        <div className="flex w-80 h-80 bg-tcatTeal text-black rounded-full flex items-center p-6 mt-20 shadow-lg">
+          <p className="font-medium">
+            Read these real stories from the groundbreaking report <strong>Transportation Access for Everyone: Washington State</strong> by the Disability Mobility Initiative and Disability Rights Washington.
+          </p>
+        </div>
       </div>
 
+
       {/* Game Introduction */}
-      <div className="mt-80 px-6 pb-10">
+      <div className="mt-10 px-6 pb-10">
         <h3 className="text-2xl font-bold text-black">
           Let’s play an active transportation game!
         </h3>

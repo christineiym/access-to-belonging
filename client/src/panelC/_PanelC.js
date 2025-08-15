@@ -66,7 +66,7 @@ export default function PanelC() {
       {/* QR and Map Image */}
       <div className="relative m-10 px-4 flex justify-center">
         <img
-          src="https://picsum.photos/600/400"
+          src="/access-to-belonging/bus-carnation_to_redmond.png"
           alt="Map from Carnation to Redmond"
           className="rounded-md max-w-full border-4 border-purple-700"
         />

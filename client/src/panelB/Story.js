@@ -15,7 +15,7 @@ export default function Story({ name, location, summary, quote, takeaway, imageS
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="mt-2">
+        <div className="pt-5 pl-3 pr-5 justify-center">
           <blockquote className="border-l-4 border-tcatTeal pl-4"><p>{quote}</p></blockquote>
         </div>
         <div className="flex flex-col justify-center h-full">
