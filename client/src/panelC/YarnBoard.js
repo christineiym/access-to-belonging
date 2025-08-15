@@ -83,11 +83,12 @@ export default function YarnBoard() {
   // Fetch connections with displayOnly=1
   useEffect(() => {
     axios.get('http://localhost:3001/connection?displayOnly=1')
-      .then((res) => {
+      .then(res => {
         setGroupedConnections(aggregateConnections(res.data));
         // console.log(res.data);
       })
       .catch(() => {
+        console.log("in catch");
         // fallback to demo data if backend fails
         fetch("./demo.json")
           .then((res) => res.json())
