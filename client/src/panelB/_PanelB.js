@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import Story from "./Story";
+import Story from "./StoryWithZoom";
 
 export default function PanelB() {
   const [showButtons, setShowButtons] = useState(false);
@@ -36,7 +36,12 @@ export default function PanelB() {
         quote={<>“I had to attend a <strong>90-minute meeting</strong> in Carnation, 20 minutes from where I live, and, using the local transportation, to be picked up at home, taken to the meeting, picked up after the meeting and brought back home took <strong>seven and a half hours door to door</strong>. I had to attend those meetings but doing so took up my entire day because the buses are so limited and infrequent.”</>}
         takeaway={"Infrequent transit impacts connectivity to daily needs and services."}
         imageSource={"/access-to-belonging/walksheds-north_bend.png"}
-        imageAltText={"North Bend Walksheds"}
+        shortDescription={"North Bend Walksheds. Expand to learn more."}
+        longDescription={`The map shows central North Bend, Washington, with streets, parks, rivers, building areas, and points of interest.
+          Specifically, lines represent unconstrained Pedestrian Walksheds — routes that are theoretically walkable in general. 
+          The walkshed network is densest in the downtown grid, spreading outward along key corridors in all directions.
+          To the southwest, the walkshed extends into a large commercial/industrial area near the highway interchange, connecting multiple points of interest.\
+          To the southeast and northeast, coverage is more fragmented, with several streets ending abruptly at undeveloped areas or open spaces.`}
       />
 
       <Story name={"Deborah"} 
@@ -45,7 +50,15 @@ export default function PanelB() {
         quote={<>“The biggest issue here is actually a lack of sidewalks to get to the public transit. I do like using public transit when I can because [there is] a bit more control than you would with paratransit.”</>}
         takeaway={"Inaccessible sidewalks impact how disabled travellers plan their trips."}
         imageSource={"/access-to-belonging/walksheds-clarkston.png"}
-        imageAltText={"Clarkston Walksheds"}
+        shortDescription={"Clarkston Walksheds. Expand to learn more."}
+        longDescription={`The Clarkston Walksheds map highlights areas accessible to manual wheelchair users, shown as thick lines 
+          concentrated in a grid-like street network in central Clarkston. Accessibility coverage is dense in the downtown core, 
+          with connections along major streets, but coverage becomes sparse toward the periphery, especially in the southwest 
+          and northern edges where gaps in the network limit continuous travel. Points of Interest (POIs) mostly cluster within 
+          or near the accessible network, including near the riverfront, public facilities, and commercial areas. 
+          However, some POIs, particularly in the far south and north, are isolated from the main accessible routes, 
+          indicating potential accessibility challenges for reaching them. The map underscores that while central Clarkston 
+          is well-served by wheelchair-accessible paths, outlying areas have notable connectivity limitations.`}
       />
 
       <Story name={"Nick"} 
@@ -54,7 +67,13 @@ export default function PanelB() {
         quote={<>“I used to drive, and the thing I don't think people who can drive understand about taking the bus is how much longer it takes to go places.”</>}
         takeaway={"A lack of tactile wayfinding results in inaccurate navigation."}
         imageSource={"/access-to-belonging/walksheds-liberty_lake.png"}
-        imageAltText={"Liberty Lake Walksheds"}
+        shortDescription={"Liberty Lake Walksheds. Expand to learn more."}
+        longDescription={`The Liberty Lake map shows manual wheelchair-accessible routes concentrated in small, disconnected pockets, 
+          mostly within residential neighborhoods. Major barriers like Interstate 90 and limited crossing points fragment the network, 
+          making continuous travel difficult. While local movement within neighborhoods is possible, access to commercial areas, transit stops, 
+          parks, and the lakeshore is limited, suggesting steep grades, missing curb ramps, or unpaved paths reduce connectivity. 
+          Overall, the map indicates that wheelchair users face significant challenges in traveling longer distances or reaching 
+          key destinations without relying on other transportation modes.`}
       />
 
       {/* SDF link */}

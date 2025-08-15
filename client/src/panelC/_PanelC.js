@@ -67,8 +67,8 @@ export default function PanelC() {
       <div className="relative m-10 px-4 flex justify-center">
         <img
           src="/access-to-belonging/bus-carnation_to_redmond.png"
-          alt="Map from Carnation to Redmond"
-          className="rounded-md max-w-full border-4 border-purple-700"
+          alt="Satellite map from Carnation, Washington, to Redmond, Washington. By bus, travel times range from about 1 hour 35 minutes to 3 hours 27 minutes, depending on route and transfer points. The fastest option takes approximately 1 hour 35 minutes and runs every 90 minutes via State Route 203 through Duvall. Longer routes take 2 hours 25 minutes to over 3 hours, with less frequent service (every 2 hours) and more transfers, traveling through Issaquah, Bellevue, and Seattle. "
+          className="rounded-md max-w-4xl border-4 border-purple-700"
         />
         {/* <div className="absolute top-6 right-6 bg-white p-1 rounded shadow">
           <img
