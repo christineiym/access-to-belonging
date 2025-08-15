@@ -3,11 +3,9 @@ import axios from 'axios';
 import YarnBoardForm from './YarnBoardForm';
 
 // TODO: fetch actual values from database
-const leftLabels = ['Wheelchair User', 'Cyclist', 'Avid Walker', 'Parent with a stroller', 'Transit Rider', 'White-Cane User'];
-const rightLabels = ['Lack of lighting', 'Large cracks', 'No curb ramps', 'Steep inclines', 'Confusing wayfinding', 'No tactile-paving', 'No audible pedestrian signal'];
 const listGapHtml = 28;
 const listGapSvg = 20;
-const maxLen = (leftLabels.length >= rightLabels.length) ? leftLabels.length : rightLabels.length;
+
 
 // Assign a color for each left-side value, using colorblind-friendly Okabe and Ito palette
 // TODO: check contrast
@@ -49,10 +47,46 @@ export default function YarnBoard() {
     return result;
   }
 
+  // Dynamic labels from backend
+  const [leftLabels, setLeftLabels] = useState([]);
+  const [rightLabels, setRightLabels] = useState([]);
+  const [maxLen, setMaxLen] = useState((leftLabels.length >= rightLabels.length) ? leftLabels.length : rightLabels.length);
+
+  // Fetch leftLabels (personas) and rightLabels (barriers) from backend
   useEffect(() => {
-    // Fetch actual connections from backend and aggregate
-    axios.get('http://localhost:3001/connections')
-      .then(res => setGroupedConnections(aggregateConnections(res.data)))
+    axios.get('http://localhost:3001/persona?displayOnly=1')
+      .then(res => {
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          setLeftLabels(res.data.map(p => p.text));
+        }
+      })
+      .catch(() => {
+        // fallback to demo data if backend fails
+        setLeftLabels(['Wheelchair User', 'Cyclist', 'Avid Walker', 'Parent with a stroller', 'Transit Rider', 'White-Cane User']);
+      });
+    axios.get('http://localhost:3001/barrier?displayOnly=1')
+      .then(res => {
+        if (Array.isArray(res.data) && res.data.length > 0) {
+          setRightLabels(res.data.map(b => b.text));
+        }
+      })
+      .catch(() => {
+        // fallback to demo data if backend fails
+        setRightLabels(['Lack of lighting', 'Large cracks', 'No curb ramps', 'Steep inclines', 'Confusing wayfinding', 'No tactile-paving', 'No audible pedestrian signal']);
+      });
+  }, []);
+
+  useEffect(() => {
+    setMaxLen((leftLabels.length >= rightLabels.length) ? leftLabels.length : rightLabels.length);
+  }, [leftLabels, rightLabels]);
+
+  // Fetch connections with displayOnly=1
+  useEffect(() => {
+    axios.get('http://localhost:3001/connection?displayOnly=1')
+      .then((res) => {
+        setGroupedConnections(aggregateConnections(res.data));
+        // console.log(res.data);
+      })
       .catch(() => {
         // fallback to demo data if backend fails
         fetch("./demo.json")
@@ -100,7 +134,7 @@ export default function YarnBoard() {
   };
 
   const actuallyFocusItem = ({ side, index }) => {
-    console.log(`Current focus: ${side}-${index}`);
+    // console.log(`Current focus: ${side}-${index}`);
     setFocus({ side, index });
     const currentItem = getItemByLocation(side, index);
     if (currentItem) {
@@ -252,15 +286,17 @@ export default function YarnBoard() {
     // console.log(getConnectionCount)
   };
 
-  const handleSubmit = async () => {  // TODO: update according to input form; change to base
-    console.log("submitted");
+  // Update handleSubmit to POST to backend using barrier/persona text
+  const handleSubmit = async (formData) => {
+    // formData: { dropdown, checkboxes }
     try {
       await Promise.all(
-        sessionConnections.map(({ from, to }) => {
-          axios.post('http://localhost:3001/connections', { from, to });
-          console.log("new connection!");
-          console.log(from);
-          console.log(to);
+        formData.checkboxes.map(async (barrierText) => {
+          await axios.post('http://localhost:3001/connection', {
+            barrier_text: barrierText,
+            persona_text: formData.dropdown,
+            time: Date.now()
+          });
         })
       );
       localStorage.setItem('hasSubmitted', 'true');
@@ -313,8 +349,10 @@ export default function YarnBoard() {
 
   const renderConnections = (set) => {
     return set.map((item, idx) => {
-      let leftIndex = item.fromDot;
-      let rightIndex = item.toDot;
+      // console.log(item);
+      // Find indices by matching text
+      let leftIndex = leftLabels.findIndex(label => label === item.fromDot);
+      let rightIndex = rightLabels.findIndex(label => label === item.toDot);
       let current_x1 = 0;
       let current_y1 = listGapSvg + leftIndex * listGapSvg;
       let current_x2 = 100;
@@ -330,7 +368,7 @@ export default function YarnBoard() {
         <g key={idx}>
           <line
             tabIndex={0}
-            aria-label={`${leftLabels[leftIndex]} to ${rightLabels[rightIndex]}, ${item.count} connections.`}
+            aria-label={`${item.fromDot} to ${item.toDot}, ${item.count} connections.`}
             x1={current_x1}
             y1={current_y1}
             x2={current_x2}
@@ -359,6 +397,10 @@ export default function YarnBoard() {
     const idx = hoveredConnection ?? focusedConnection;
     if (typeof idx !== 'number' || !groupedConnections[idx]) return null;
     const item = groupedConnections[idx];
+    // Find indices by matching text
+    let leftIndex = leftLabels.findIndex(label => label === item.fromDot);
+    let rightIndex = rightLabels.findIndex(label => label === item.toDot);
+    // console.log(item);
     const { x, y } = getConnectionLinePosition(idx);
     return (
       <div
@@ -370,7 +412,7 @@ export default function YarnBoard() {
         }}
       >
         <div className="bg-white border border-purple-600 rounded px-3 py-1 text-xs text-purple-900 shadow-lg text-center">
-          {leftLabels[item.fromDot]} to {rightLabels[item.toDot]}: <strong>{item.count}</strong> connection{item.count > 1 ? 's' : ''}
+          {leftLabels[leftIndex]} to {rightLabels[rightIndex]}: <strong>{item.count}</strong> connection{item.count > 1 ? 's' : ''}
         </div>
       </div>
     );
