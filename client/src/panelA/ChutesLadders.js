@@ -12,7 +12,8 @@ const playersAtStart = [
 
 // todo: put state variables into session/localStorage
 export default function ChutesLadders() {
-    const [mode, setMode] = useState(null);
+    const [mode, setMode] = useState("play");
+    const [winner, setWinner] = useState(null);
     const [playerPositions, setPlayerPositions] = useState(playersAtStart);
     const [allPositions, setAllPositions] = useState([]);
     const [lastScenarioDraw, setLastScenarioDraw] = useState(null);
@@ -210,6 +211,8 @@ export default function ChutesLadders() {
             }
         }
 
+        let currentAnnouncement = path.length > 0 ? `${player.name} moved to tile ${path[path.length - 1]}.` : `${player.name} stayed at tile ${endPos}. `
+
         // Check if we land on a mover start
         const moverHit = [
             ...(movers["chutes"] || []),
@@ -219,10 +222,11 @@ export default function ChutesLadders() {
         if (moverHit) {
             // Interpolate positions along mover line (simple straight step)
             path.push(moverHit.to);
+            currentAnnouncement = currentAnnouncement + ` ${player.name} was then moved to ${moverHit.to}.`
         }
 
         // console.log("moving ", player.name, " by ", moveValue, ", from ", startPos, " to ", endPos);
-        setAnnouncement(path.length > 0 ? `${player.name} moved to tile ${path[path.length - 1]}.` : `${player.name} stayed at tile ${endPos}.`);
+        setAnnouncement(currentAnnouncement);
 
         // Animate if necessary
         setCurrentPlayerPath(path);
@@ -262,6 +266,18 @@ export default function ChutesLadders() {
             setCurrentPlayerIndex((currentPlayerIndex + 1) % playerPositions.length);
         }
     }, [turnInProgress, playerPositions.length]);
+
+    // Check for win condition
+    useEffect(() => {
+        // Check for win condition
+        const winningPos = edgeLength ** 2;
+        const currentWinner = playerPositions.find(p => p.position === winningPos);
+        if (currentWinner) {
+            setMode("won");
+            setWinner(currentWinner.name);
+            setAnnouncement(`${currentWinner.name} won!`)
+        }
+    }, [playerPositions, edgeLength]);
 
     const testSettings = true;
     return (

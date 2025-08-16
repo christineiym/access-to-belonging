@@ -35,8 +35,10 @@ export default function FlipCardStack({ type, allCards, onDraw }) {
 
   const handleDraw = () => {
     if (remaining.length === 0 || animatingCard) return;
-    const card = remaining[0];
-    const newRemaining = remaining.slice(1);
+    // Draw a random card from remaining
+    const randIdx = Math.floor(Math.random() * remaining.length);
+    const card = remaining[randIdx];
+    const newRemaining = remaining.filter((_, i) => i !== randIdx);
     setAnimatingCard(card);
     setAnnouncement(`${type}: ${card.title}. ${card.description}. ${card.moveValue ? `Move ${card.moveValue}`: ""}`);
 
@@ -48,7 +50,6 @@ export default function FlipCardStack({ type, allCards, onDraw }) {
       setAnimatingCard(null);
       storage.setItem(storageKey, JSON.stringify({ remaining: newRemaining, drawn: newDrawn }));
 
-      // where's the best place to put this? (in terms of timing)
       onDraw(type, card);  // Pass result upward
     }, 500);
   };
